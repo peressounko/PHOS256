@@ -28,7 +28,6 @@ set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 # Path to additonal modules
 set(CMAKE_MODULE_PATH "${PHOS256_SOURCE_DIR}/cmake")
 
-
 include(CheckCXXCompilerFlag)
 
   # ROOT configuration mandatory
@@ -42,19 +41,19 @@ include(CheckCXXCompilerFlag)
 
       # find VMC standalone
       # VMC standalone will fail if ROOT was found with VMC
- #     find_package(VMC)
- #     if(VMC_FOUND)
- #       message(STATUS "Using standalone VMC")
+      find_package(VMC)
+      if(VMC_FOUND)
+        message(STATUS "Using standalone VMC")
         # AliRoot's FindROOT module does not actually provide targets but only does link_libraries(ROOT_LIB_DIR).
         # So AliRoot finds libs by name in that dir but not as a target.
         # On the other hand VMCLibrary is linked against targets ROOT::Core etc which come in with a find_package(ROOT CONFIG).
         # So Let's slightly modify the VMCLibrary target properties...
- #       set(VMC_DEPS Core EG Geom Physics)
- #       set_target_properties(VMCLibrary PROPERTIES INTERFACE_LINK_LIBRARIES "${VMC_DEPS}")
+        set(VMC_DEPS Core EG Geom Physics)
+        set_target_properties(VMCLibrary PROPERTIES INTERFACE_LINK_LIBRARIES "${VMC_DEPS}")
         # Alias target before VMC was also found by name "VMC"
- #      add_library(VMC ALIAS VMCLibrary)
- #       include_directories(${VMC_INCLUDE_DIRS})
- #     endif()
+       add_library(VMC ALIAS VMCLibrary)
+        include_directories(${VMC_INCLUDE_DIRS})
+      endif()
   else()
       message(FATAL_ERROR "ROOT installation not found!\nPlease point to the ROOT installation using -DROOTSYS=ROOT_INSTALL_DIR")
   endif(ROOTSYS)
@@ -89,5 +88,5 @@ include(CheckCXXCompilerFlag)
 
 
   add_subdirectory(dataformats)
+  add_subdirectory(simulation)
 
-#include(cmake/CMakeLists.cmake)

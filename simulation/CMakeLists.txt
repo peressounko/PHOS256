@@ -1,8 +1,9 @@
-# Create a library called "libDataFormats" which includes the source files given in the array .
-Set(LibName "DataFormats")
+# Create a library called "libSimulation" which includes the source files given in the array .
+Set(LibName "Simulation")
 
 set(INCLUDE_DIRECTORIES
   ${ROOT_INCLUDE_DIRS}
+  ${PHOS256_SOURCE_DIR}/dataformats
   ${CMAKE_CURRENT_LIST_DIR}
 )
 
@@ -10,7 +11,7 @@ Set(SYSTEM_INCLUDE_DIRECTORIES
   ${ROOT_INCLUDE_DIR}
 )
 
-include_directories(${INCLUDE_DIRECTORIES})
+include_directories(${INCLUDE_DIRECTORIES} ${VMC_INCLUDE_DIRS})
 
 set(LINK_DIRECTORIES
   ${ROOT_LIBRARY_DIR}
@@ -20,11 +21,11 @@ link_directories(${LINK_DIRECTORIES})
 
 # List of source files
 set(SRCS
-  Hit.cxx Digit.cxx
+  Geometry.cxx Phos.cxx SimParams.cxx Stack.cxx
 )
 
 set(HEADERS
-  Hit.h Digit.h
+  Geometry.h Phos.h SimParams.h Stack.h
 )
 
 # Generate the dictionary
