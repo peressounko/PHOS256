@@ -19,6 +19,7 @@ class Geometry : public TObject
 
   // local/master conversions
   static int RelToAbsId(int moduleNumber, int strip, int cell);
+  static void RelToAbsId(const int relid[2], int& absId);
 
   // Return general PHOS parameters
   void GetModuleAngles(float angle[3][2]) const;
@@ -88,6 +89,9 @@ class Geometry : public TObject
 
  private:
   static Geometry* fgGeom;
+
+  static constexpr int fNPhi = 16; // Number of crystal units in X (phi) direction
+  static constexpr int fNZ = 16;   // Number of crystal units in Z direction
 
   float fModR = 0.;         // Distance from IP to front surface of crystals
   float fModTheta = 0.;     // polar angle to module center
@@ -182,8 +186,6 @@ class Geometry : public TObject
   int fNStripX = 2;        // Number of strip units in X
   int fNStripZ = 8;        // Number of strip units in Z
   int fNTSupports = 0;     // geometry parameter
-  int fNPhi = 0;           // Number of crystal units in X (phi) direction
-  int fNZ = 0;             // Number of crystal units in Z direction
 
   ClassDefNV(Geometry, 1) // PHOS geometry class
 };

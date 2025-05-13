@@ -1,68 +1,72 @@
 #ifndef SIMULATION_H
 #define SIMULATION_H
 
-//
-// class for running generation, simulation and digitization
-// Hits and digits are created by typing:
-//   Simulation sim;
-//   sim.Run();
+/// \file Simulation.h
+/// \brief Definition of the Simulation class
+///
+#include "TMCVerbose.h"
+#include <TGeoUniformMagField.h>
+#include <TVirtualMCApplication.h>
 
-#include <TNamed.h>
+#include "TMCRootManager.h"
 
-class Simulation
+// This project
+#include "Hall.h"
+#include "Phos.h"
+#include "Stack.h"
+#include "MagField.h"
+#include "GenBox.h"
+#include "Digitizer.h"
+
+#include "Hit.h"
+#include "Digit.h"
+
+class Simulation : public TVirtualMCApplication
 {
  public:
   Simulation() = default;
-  ~Simulation() = default;
+  Simulation(const Simulation* s);
+  virtual ~Simulation() = default;
 
-  static Simulation* Instance()
-  {
-    if (!fgInstance)
-      fgInstance = new Simulation();
-    return fgInstance;
-  }
-
-  void SetNumberOfEvents(int nEvents);
-
-  void SetRunNumber(int run);
-  void SetSeed(int seed);
-
-  void SetCalibration(std::string filename);
-
-  bool Run(int nEvents = 0);
-
-  bool RunSimulation(int nEvents = 0);
-  bool RunDigitization();
-
-  // Sets the name of the file from which the geometry is loaded
-  void SetGeometryFile(std::string filename) { fGeometryFile = filename; }
-  bool IsGeometryFromFile() const { return !fGeometryFile.size() == 0; }
+  // methods
+  void InitMC(std::string configName);
+  void RunMC(Int_t nofEvents);
   void FinishRun();
 
+  virtual TVirtualMCApplication* CloneForWorker() const;
+  virtual void InitOnWorker();
+  virtual void FinishRunOnWorker();
+
+  virtual void ConstructGeometry();
+  virtual void InitGeometry() { printf("InitGeometry\n"); }
+  virtual void AddParticles() {}
+  virtual void AddIons() {}
+  virtual void GeneratePrimaries();
+  virtual void BeginEvent();
+  virtual void BeginPrimary() {}
+  virtual void PreTrack() {}
+  virtual void Stepping();
+  virtual void PostTrack() {}
+  virtual void FinishPrimary();
+  virtual void FinishEvent();
+
  private:
-  void InitDB();
-  void InitRunNumber();
+  mutable TMCRootManager* fRootManager; //!< Root manager
+  bool fIsMaster = true;                ///< If is on master thread
 
-  static Simulation* fgInstance = nullptr; // Static pointer to object
+  Stack* fStack = nullptr;       ///< VMC stack
+  GenBox* fGenerator = nullptr;  ///< Primary generator
+  MagField* fMagField = nullptr; ///< Uniform magnetic field
 
-  bool fRunGeneration;           // generate prim. particles or not
-  bool fRunSimulation;           // simulate detectors (hits) or not
-  TString fLoadAlObjsListOfDets; // Load alignment data from CDB for these detectors
-  TString fMakeDigits;           // create digits for these detectors
+  // Calorimeter description
+  Hall* fHall = nullptr;
+  Phos* fPHOS = nullptr;
+  Digitizer* fDigitizer = nullptr;
+  // Digitizer *fDigitozer = nullptr;
+  std::vector<Hit> fHits;
+  std::vector<Digit> fDigits;
 
-  int fNEvents;            // number of events
-  TString fConfigFileName; // name of the config file
-
-  int fRun;                  //! Run number, will be passed to CDB and gAlice!!
-  int fSeed;                 //! Seed for random number generator
-  bool fInitCDBCalled;       //! flag to check if CDB storages are already initialized
-  bool fInitRunNumberCalled; //! flag to check if run number is already initialized
-
-  bool fUseDetectorsFromGRP; // do not simulate detectors absent in the GRP
-
-  TString fGeometryFile; // Geometry file
-
-  ClassDefNV(Simulation, 1) // class for running generation, simulation and digitization
+  ClassDef(Simulation, 1) // Interface to MonteCarlo application
 };
 
-#endif
+#endif //

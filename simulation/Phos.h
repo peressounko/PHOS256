@@ -28,6 +28,8 @@ class Phos
   // construct GEANT geometry
   void CreateGeometry(); // creates the geometry for GEANT
 
+  void SetHitContainer(std::vector<Hit>* hits) { fHits = hits; }
+
   // Tracking
   void Reset();
   bool ProcessHits();
@@ -35,11 +37,21 @@ class Phos
   void FinishPrimary();
 
  protected:
-  void CreateGeometryforEMC(void);     // creates the PHOS geometry for GEANT
-  void CreateGeometryforSupport(void); // creates the Support geometry for GEANT
+  void CreateGeometryforEMC(void); // creates the PHOS geometry for GEANT
+  // void CreateGeometryforSupport(void); // creates the Support geometry for GEANT
   void AddHit(int primary, int id, float* hits);
 
  private:
+  enum materials { kAir = 1,
+                   kPWO,
+                   kAl,
+                   kTyvek,
+                   kFoam,
+                   kSi,
+                   kPCB,
+                   kSteel,
+                   kFiberglas,
+                   kCables }; // start numbers after Hall media
   // Simulation
   std::map<int, int> fSuperParents;  //! map of current tracks to SuperParents: entered PHOS active volumes particles
   std::vector<Hit>* fHits = nullptr; //! Collection of PHOS hits
@@ -47,10 +59,6 @@ class Phos
   int fCurrentCellID = 0;            //! current cell Id
   int fCurentSuperParent = 0;        //! current SuperParent ID: particle entered PHOS
   Hit* fCurrentHit = nullptr;        //! current Hit
-
-  // Geometry and GEANT
-  int fIdtmed[21]; //! GEANT media
-  int fIdmate[21]; //! GEANT materials
 
   ClassDefNV(Phos, 1) // Implementation of PHOS manager class for layout EMC+PPSD
 };

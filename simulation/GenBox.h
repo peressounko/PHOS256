@@ -1,21 +1,5 @@
-#ifndef A01_PRIMARY_GENERATOR_H
-#define A01_PRIMARY_GENERATOR_H
-
-//------------------------------------------------
-// The Virtual Monte Carlo examples
-// Copyright (C) 2007 - 2014 Ivana Hrivnacova
-// All rights reserved.
-//
-// For the licensing terms see geant4_vmc/LICENSE.
-// Contact: root-vmc@cern.ch
-//-------------------------------------------------
-
-/// \file A01PrimaryGenerator.h
-/// \brief Definition of the A01PrimaryGenerator class
-///
-/// Geant4 example A01 adapted to Virtual Monte Carlo: \n
-///
-/// \author I. Hrivnacova; IPN, Orsay
+#ifndef GENBOX_H
+#define GENBOX_H
 
 #include <TVirtualMCApplication.h>
 
@@ -24,60 +8,48 @@ class TVector3;
 
 class A01DetectorConstruction;
 
-/// \ingroup A01
-/// \brief The primary generator
-///
-/// \date 12/05/2012
-/// \author I. Hrivnacova; IPN, Orsay
-
-class A01PrimaryGenerator : public TObject
+class GenBox : public TObject
 {
  public:
-  A01PrimaryGenerator(TVirtualMCStack* stack);
-  A01PrimaryGenerator(
-    const A01PrimaryGenerator& origin, TVirtualMCStack* stack);
-  A01PrimaryGenerator();
-  virtual ~A01PrimaryGenerator();
+  GenBox(TVirtualMCStack* stack);
+  GenBox(const GenBox& origin, TVirtualMCStack* stack);
+  GenBox() = default;
+  ~GenBox() = default;
 
   // methods
-  virtual void GeneratePrimaries();
+  void Generate();
 
   // set methods
-  void SetNofPrimaries(Int_t nofPrimaries);
-  void SetMomentum(Double_t val) { fMomentum = val; }
-  void SetSigmaMomentum(Double_t val) { fSigmaMomentum = val; }
-  void SetSigmaAngle(Double_t val) { fSigmaAngle = val; }
-  void SetRandomize(Bool_t val) { fRandomizePrimary = val; }
-
-  // get methods
-  Double_t GetMomentum() const { return fMomentum; }
-  Double_t GetSigmaMomentum() const { return fSigmaMomentum; }
-  Double_t GetSigmaAngle() const { return fSigmaAngle; }
-  Bool_t GetRandomize() const { return fRandomizePrimary; }
+  void SetNofPrimaries(int nofPrimaries) { fNofPrimaries = nofPrimaries; }
+  void SetMomentumRange(double ptMin, double ptMax)
+  {
+    fPtMin = ptMin;
+    fPtMax = ptMax;
+  }
+  void SetThetaRange(double thetamin, double thetamax)
+  {
+    fThetaMin = thetamin;
+    fThetaMax = thetamax;
+  }
+  void SetPhiRange(double phimin, double phimax)
+  {
+    fPhiMin = phimin;
+    fPhiMax = phimax;
+  }
+  virtual void SetPart(int part) { fIpart = part; }
 
  private:
-  // methods
-  // void GeneratePrimary();
-
   // data members
-  TVirtualMCStack* fStack;  ///< VMC stack
-  Int_t fNofPrimaries;      ///< Number of primary particles
-  Int_t fDefaultParticle;   ///< Default particle PDG
-  Double_t fMomentum;       ///< Default particle momentum
-  Double_t fSigmaMomentum;  ///< The sigma of particle momentum
-  Double_t fSigmaAngle;     ///< The sigma of particle direction
-  Bool_t fRandomizePrimary; ///< Option to randomize primary particle type
+  TVirtualMCStack* fStack = nullptr; ///< VMC stack
+  int fNofPrimaries = 0;             ///< Number of primary particles
+  int fIpart = 22;                   ///< Default particle PDG
+  double fPtMin = 0.1;               ///< Default particle momentum
+  double fPtMax = 1.;                ///< Default particle momentum
+  double fThetaMin = 10.;            ///< degree
+  double fThetaMax = 20.;            ///< degree
+  double fPhiMin = 80.;              ///< degree
+  double fPhiMax = 100.;             ///< degree
 
-  ClassDef(A01PrimaryGenerator, 1) // A01PrimaryGenerator
+  ClassDef(GenBox, 1) // GenBox
 };
-
-// inline functions
-
-/// Set the number of particles to be generated
-/// \param nofPrimaries The number of particles to be generated
-inline void A01PrimaryGenerator::SetNofPrimaries(Int_t nofPrimaries)
-{
-  fNofPrimaries = nofPrimaries;
-}
-
-#endif // A01_PRIMARY_GENERATOR_H
+#endif // GENBOX_H

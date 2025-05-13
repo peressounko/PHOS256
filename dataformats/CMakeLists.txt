@@ -19,12 +19,10 @@ set(LINK_DIRECTORIES
 link_directories(${LINK_DIRECTORIES})
 
 # List of source files
-set(SRCS
-  Hit.cxx Digit.cxx
+set(SRCS Hit.cxx Digit.cxx
 )
 
-set(HEADERS
-  Hit.h Digit.h
+set(HDRS Hit.h Digit.h
 )
 
 # Generate the dictionary

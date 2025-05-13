@@ -10,8 +10,8 @@ class Stack : public TVirtualMCStack
 {
  public:
   Stack(int size);
-  Stack();
-  virtual ~Stack();
+  Stack() = default;
+  virtual ~Stack() = default;
 
   // methods
   virtual void PushTrack(int toBeDone, int parent, int pdg, Double_t px,
@@ -36,10 +36,10 @@ class Stack : public TVirtualMCStack
 
  private:
   // data members
-  std::stack<TParticle*> fStack; //!< The stack of particles (transient)
-  TClonesArray* fParticles;      ///< The array of particle (persistent)
-  int fCurrentTrack;             ///< The current track number
-  int fNPrimary;                 ///< The number of primaries
+  std::stack<TParticle*> fStack;      //!< The stack of particles (transient)
+  TClonesArray* fParticles = nullptr; ///< The array of particle (persistent)
+  int fCurrentTrack = -1;             ///< The current track number
+  int fNPrimary = 0;                  ///< The number of primaries
 
   ClassDef(Stack, 1) // Stack
 };

@@ -1,9 +1,7 @@
 /// Geant4 example A01 adapted to Virtual Monte Carlo \n
 /// The implementation of the Stack taken from the E03 example.
 
-#include <Riostream.h>
 #include <TClonesArray.h>
-#include <TError.h>
 #include <TParticle.h>
 
 #include "Stack.h"
@@ -24,21 +22,15 @@ ClassImp(Stack)
   fParticles = new TClonesArray("TParticle", size);
 }
 
-//_____________________________________________________________________________
-Stack::Stack() : fParticles(0), fCurrentTrack(-1), fNPrimary(0)
-{
-  /// Default constructor
-}
+// //_____________________________________________________________________________
+// Stack::~Stack()
+// {
+//   /// Destructor
 
-//_____________________________________________________________________________
-Stack::~Stack()
-{
-  /// Destructor
-
-  if (fParticles)
-    fParticles->Delete();
-  delete fParticles;
-}
+//   if (fParticles)
+//     fParticles->Delete();
+//   delete fParticles;
+// }
 
 // private methods
 

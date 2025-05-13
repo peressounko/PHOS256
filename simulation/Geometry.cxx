@@ -70,6 +70,32 @@ const Geometry* Geometry::Instance(float r, float theta)
   return fgGeom;
 }
 
+int Geometry::RelToAbsId(int moduleNumber, int strip, int cell)
+{
+  // calculates absolute cell Id from moduleNumber, strip (number) and cell (number)
+  // PHOS layout parameters:
+  const int nStrpZ = 8;                  // Number of strips along z-axis
+  const int nCrystalsInModule = 16 * 16; // Total number of crystals in module
+  const int nCellsXInStrip = 8;          // Number of crystals in strip unit along x-axis
+  const int nZ = 16;                     // nStripZ * nCellsZInStrip
+
+  int row = nStrpZ - (strip - 1) % nStrpZ;
+  int col = (int)std::ceil((float)strip / (nStrpZ)) - 1;
+
+  return (moduleNumber - 1) * nCrystalsInModule + row * 2 + (col * nCellsXInStrip + (cell - 1) / 2) * nZ -
+         (cell & 1 ? 1 : 0);
+}
+
+//____________________________________________________________________________
+void Geometry::RelToAbsId(const int relid[2], Int_t& absId)
+{
+  // Converts the relative numbering into the absolute numbering
+  // PHOS crystals:
+  //  absId = from 1 to fNModules * fNPhi * fNZ
+  absId = (relid[0] - 1) * fNZ // the offset along phi
+          + relid[1];          // the offset along z
+}
+
 // //____________________________________________________________________________
 // void Geometry::GetGlobalPHOS(const AliPHOSRecPoint* recPoint, TVector3 & gpos) const
 // {
@@ -420,8 +446,8 @@ void Geometry::Init()
   fEMCParams[1] = (fAlCoverParams[1] - fAlCoverParams[0]) * fEMCParams[3] / fAlCoverParams[3] + fAlCoverParams[0]; // Lower size across the beam
   fEMCParams[2] = fWarmAlCoverHalfSize[1];                                                                         // Size along the beam
 
-  fNPhi = fNStripX * fNCellsXInStrip; // number of crystals across the beam
-  fNZ = fNStripZ * fNCellsZInStrip;   // number of crystals along the beam
+  // fNPhi = fNStripX * fNCellsXInStrip; // number of crystals across the beam
+  // fNZ = fNStripZ * fNCellsZInStrip;   // number of crystals along the beam
 
   // calculate offset to crystal surface
   fCrystalShift = -fInnerThermoHalfSize[1] + fStripHalfSize[1] + fSupportPlateHalfSize[1] +

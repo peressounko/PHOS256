@@ -24,8 +24,10 @@ class SimParams : public TObject
   float fDeadTime = 20.;             ///< PHOS dead time (includes Read-out time i.e. mDeadTime>=mReadoutTime)
   float fReadoutTimePU = 2000.;      ///< Read-out time in ns if pileup simulation on in DigitizerSpec
   float fDeadTimePU = 30000.;        ///< PHOS dead time if pileup simulation on in DigitizerSpec
+  bool fSmearLightCollection = true; ///< Mimic light collection
   bool fApplyTimeResolution = false; ///< Apply time resolution in digitization
   bool fApplyNonLinearity = false;   ///< Apply energy non-linearity in digitization
+  bool fSimulateNoise = true;        ///< Simulate noise in digitization
   bool fApplyDigitization = false;   ///< Apply energy digitization in digitization
   float fAPDNoise = 0.005;           ///< RMS of APD noise
   float fDigitThreshold = 2.;        ///< minimal energy to keep digit in ADC counts
@@ -42,9 +44,6 @@ class SimParams : public TObject
   float fTimeResThreshold = 0.5;  ///< threshold for time resolution calculation (in GeV)
   float fMinNoiseTime = -200.e-9; ///< minimum time in noise channels (in sec)
   float fMaxNoiseTime = 2000.e-9; ///< minimum time in noise channels (in sec)
-
-  float fTrig2x2MinThreshold = 800.; ///< threshold to simulate 2x2 trigger turn-on curve (in ADC counts~0.005 GeV/count!)
-  float fTrig4x4MinThreshold = 900.; ///< threshold to simulate 4x4 trigger turn-on curve (in ADC counts!)
 
   // Parameters used in Raw simulation
   float fSampleDecayTime = 0.091; ///< Time parameter in Gamma2 function (1/tau, 100.e-9/2.1e-6)

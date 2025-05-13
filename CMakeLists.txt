@@ -30,6 +30,9 @@ set(CMAKE_MODULE_PATH "${PHOS256_SOURCE_DIR}/cmake")
 
 include(CheckCXXCompilerFlag)
 
+find_package(GEANT4 REQUIRED)
+find_package(GEANT4VMC REQUIRED)
+
   # ROOT configuration mandatory
   if(ROOTSYS)
       find_package(ROOT REQUIRED)
@@ -60,7 +63,6 @@ include(CheckCXXCompilerFlag)
 
   # ROOT dictionaries and maps
   include(CMakeROOT)
-
 
   # Turn some common warnings into errors
   check_cxx_compiler_flag(-Werror=mismatched-new-delete CXX_COMPILER_HAS_MISMATCHED_NEW_DELETE)
