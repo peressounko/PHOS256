@@ -1,35 +1,29 @@
 #ifndef CLUSTER_H
 #define CLUSTER_H 1
 
-// Cluster is a set of cells with common side or corner
-// Some parameters like full energy, position, time, shape are calculated
-
+#include <map>
+#include "TMath.h"
 #include "TObject.h"
-#include "TLorentzVector.h"
-#include "TVector3.h"
-
-#include "Digit.h"
+class Digit;
+class TLorentzVector;
+class TVector3;
 
 class Cluster : public TObject
 {
  public:
   Cluster() = default;
 
-  /** Constructor with hit parameters **/
-  Cluster(const Digit& digit);
+  Cluster(const Digit* digit);
 
-  /** Destructor **/
-  ~Cluster() = default;
+  virtual ~Cluster() = default;
 
   // Returm momentum of photon assuming it came from the provided vertex
-  void GetMomentum(TLorentzVector& p, const TVector3& vertex) const;
+  void GetMomentum(TLorentzVector& p) const;
 
-  void AddDigit(const Digit& digit, Double_t edep = 0);
+  void AddDigit(const Digit* digit, Double_t edep = 0);
   void EvalAll(); // Evaluate cluster parameters
 
   void Purify(); // Remove digits below threshold
-
-  void CorrectVertex(const TVector3& vertex);
 
   int GetNumberOfLocalMax(int* maxAt, float* maxAtEnergy) const; // Finds local maxima
 
@@ -55,15 +49,15 @@ class Cluster : public TObject
   }
 
   // Number of MC tracks
-  int GetNumberOfTracks() const { return fNPrimaries; }
-  void GetMCTrack(int i, int& trackId, float& trackEdep) const
+  int GetNumberOfLabels() const { return fNPrimaries; }
+  void GetLabel(int i, int& label, float& labelEdep) const
   {
     if (i >= 0 && i < fNPrimaries) {
-      trackId = fPrimId[i];
-      trackEdep = fPrimE[i];
+      label = fPrimId[i];
+      labelEdep = fPrimE[i];
     } else {
-      trackId = -1;
-      trackEdep = 0;
+      label = -1;
+      labelEdep = 0;
     }
   }
   float GetE() const { return fE; };
@@ -101,41 +95,42 @@ class Cluster : public TObject
     l2 = fLambda2;
   }
 
+  static double ShowerShape(double dx, double dz); // Parameterization of EM shower
+
  protected:
   void FillArrays(); // Fill arrays to store to disk
 
  protected:
+  static constexpr int kNLMMax = 5; // Maximal number of local maxima
   // Parameters used for re-calibration if necessary
   std::vector<std::pair<int, float>> fDigitIDEnergy; //! transient list of contributed digits with energies
   std::map<int, float> fMCTracks;                    //! transient trackID and energy deposit
 
-  int fNDigits;    // Digit multiplicity
-  int* fDitisId;   //[fNDigits] cellId
-  float* fDigitsE; //[fNDigits] deposited energy
+  int fNDigits = 0;          // Digit multiplicity
+  int* fDitisId = nullptr;   //[fNDigits] cellId
+  float* fDigitsE = nullptr; //[fNDigits] deposited energy
 
-  int fNPrimaries; // Number of primaries
-  int* fPrimId;    //[fNPrimaries] cellId
-  float* fPrimE;   //[fNPrimaries] deposited energy per cell
+  int fNPrimaries = 0;     // Number of primaries
+  int* fPrimId = nullptr;  //[fNPrimaries] cellId
+  float* fPrimE = nullptr; //[fNPrimaries] deposited energy per cell
 
-  float fE;       // cluster energy
-  float fEcore;   // cluster energy core
-  float fEcore1p; // cluster energy core
-  float fEcore2p; // cluster energy core
+  float fE = 0;     // cluster energy
+  float fEcore = 0; // cluster energy core
 
-  float fTime; // cluster time
+  float fTime = 0; // cluster time
 
   // cluster coordinates in global system
-  float fX; // x-coordinate of cluster
-  float fY; // y-coordinate of cluster
-  float fZ; // z-coordinate of cluster
+  float fX = 0; // x-coordinate of cluster
+  float fY = 0; // y-coordinate of cluster
+  float fZ = 0; // z-coordinate of cluster
 
   // Dispersion and shower shape parameters
-  float fDisp;    // Dispersion
-  float fChi2;    // Chi2 of a fit with EM shape
-  float fLambda1; // smaller Disp axis
-  float fLambda2; // larger Disp axis
+  float fDisp = 0;    // Dispersion
+  float fChi2 = 0;    // Chi2 of a fit with EM shape
+  float fLambda1 = 0; // smaller Disp axis
+  float fLambda2 = 0; // larger Disp axis
 
-  int fNExLM; // Number of local maxima or NLM in parent cluster before unfolding
+  int fNExLM = 0; // Number of local maxima or NLM in parent cluster before unfolding
 
   ClassDefNV(Cluster, 1);
 };

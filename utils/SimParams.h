@@ -71,7 +71,12 @@ class SimParams : public TObject
   float fUnfogingChi2Accuracy = 1.e-2; ///< critical chi2/NDF
   int nNMaxIterations = 10;            ///< Maximal number of iterations in unfolding procedure
   float fCoreR = 3.5;                  ///< Radius to caluclate core energy
+  float fChi2radiusCut = 4.;           ///< Radius to calculate chi2
   float fSortingDelta = 1.;            ///< used in sorting clusters
+  float fCluNonLineaityA = 0.;         ///< Amp of cluster non-linearity
+  float fCluNonLineaityB = 0.109;      ///< Energy scale of cluster non-linearity
+  float fCluNonLineaityC = 1.;         ///< Overall calibration
+  int fNPrimMax = 5;                   ///< maximal number of primary particles per cluster
 
  protected:
   static SimParams* fgSimParams;

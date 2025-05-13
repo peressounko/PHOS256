@@ -20,6 +20,9 @@ class Geometry : public TObject
   // local/master conversions
   static int RelToAbsId(int moduleNumber, int strip, int cell);
   static void RelToAbsId(const int relid[2], int& absId);
+  static bool AbsToRelNumbering(int, int*);
+  static void DetIdToLocalPosition(int detID, double& xi, double& zi);
+  static int AreNeighbours(int detId1, int detId2);
 
   // Return general PHOS parameters
   void GetModuleAngles(float angle[3][2]) const;
@@ -92,6 +95,7 @@ class Geometry : public TObject
 
   static constexpr int fNPhi = 16; // Number of crystal units in X (phi) direction
   static constexpr int fNZ = 16;   // Number of crystal units in Z direction
+  static constexpr float CELLSTEP = 2.25;
 
   float fModR = 0.;         // Distance from IP to front surface of crystals
   float fModTheta = 0.;     // polar angle to module center

@@ -629,6 +629,6 @@ void Phos::CreateGeometry()
                               angle[2][0], angle[2][1]);
 
   float pos[3] = {0};
-  geom->GetModuleCenter(pos);
+  // geom->GetModuleCenter(pos);
   gGeoManager->Node("PHOS", 0, "World", pos[0], pos[1], pos[2], idrotm, true, static_cast<double*>(nullptr));
 }

@@ -89,6 +89,7 @@ find_package(GEANT4VMC REQUIRED)
   set(CMAKE_NO_SYSTEM_FROM_IMPORTED TRUE)
 
 
+  add_subdirectory(utils)
   add_subdirectory(dataformats)
   add_subdirectory(simulation)
 

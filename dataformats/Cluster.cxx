@@ -1,25 +1,19 @@
 ////////////////////////////////////////////////////////////////
 //                                                            //
-//  MpdEmcHitClusterKI                                          //
+//  Cluster                                                   //
 //  Cluster production for EMC                                //
-//  Author List : D.Peresunko., RRCKI, 2019                   //
+//  Author List : D.Peresunko., RRCKI, 2025                   //
 //                                                            //
 ////////////////////////////////////////////////////////////////
 
-#include "MpdEmcClusterKI.h"
+#include "Geometry.h"
+#include "SimParams.h"
+#include "Cluster.h"
 #include <iostream>
 #include <numeric>
-#include "FairLogger.h"
-#include "MpdEmcClusterizerKI.h"
-#include "MpdEmcDigitKI.h"
-#include "MpdEmcGeoUtils.h"
-#include "MpdEmcSimParams.h"
+#include "Digit.h"
 #include "TLorentzVector.h"
-#include "TMath.h"
 #include "TVector3.h"
-
-using namespace std;
-using namespace TMath;
 
 // Function used for sorting primaries
 bool compE(const std::pair<int, float>& a, const std::pair<int, float>& b)
@@ -27,38 +21,14 @@ bool compE(const std::pair<int, float>& a, const std::pair<int, float>& b)
   return a.second > b.second;
 }
 
-// -----   Default constructor   -------------------------------------------
-
-MpdEmcClusterKI::MpdEmcClusterKI()
-  : fNDigits(0), fDitisId(nullptr), fDigitsE(nullptr), fNPrimaries(0), fPrimId(nullptr), fPrimE(nullptr), fE(0), fEcore(0), fEcore1p(0), fEcore2p(0), fTime(0), fX(0), fY(0), fZ(0), fdPhi(9999), fdZ(9999), fTrackId(-1), fDisp(0), fChi2(0), fLambda1(0), fLambda2(0), fNExLM(0)
-{
-}
-
 // -----   Standard constructor   ------------------------------------------
-MpdEmcClusterKI::MpdEmcClusterKI(const MpdEmcDigitKI* digit)
-  : fNDigits(0), fDitisId(nullptr), fDigitsE(nullptr), fNPrimaries(0), fPrimId(nullptr), fPrimE(nullptr), fE(0), fEcore(0), fEcore1p(0), fEcore2p(0), fTime(0), fX(0), fY(0), fZ(0), fdPhi(9999), fdZ(9999), fTrackId(-1), fDisp(0), fChi2(0), fLambda1(0), fLambda2(0), fNExLM(0)
+Cluster::Cluster(const Digit* digit)
+  : fNDigits(0), fDitisId(nullptr), fDigitsE(nullptr), fNPrimaries(0), fPrimId(nullptr), fPrimE(nullptr), fE(0), fEcore(0), fTime(0), fX(0), fY(0), fZ(0), fDisp(0), fChi2(0), fLambda1(0), fLambda2(0), fNExLM(0)
 {
   AddDigit(digit);
 }
-// -----   Destructor   ----------------------------------------------------
 
-MpdEmcClusterKI::~MpdEmcClusterKI()
-{
-  if (fDitisId) {
-    delete[] fDitisId;
-  }
-  if (fDigitsE) {
-    delete[] fDigitsE;
-  }
-  if (fPrimId) {
-    delete[] fPrimId;
-  }
-  if (fPrimE) {
-    delete[] fPrimE;
-  }
-}
-
-void MpdEmcClusterKI::GetMomentum(TLorentzVector& p, const TVector3* vertex) const
+void Cluster::GetMomentum(TLorentzVector& p) const
 {
   // Returm momentum of photon assuming it came from the provided vertex
   if (fX == 0. && fY == 0.) { // position not defined
@@ -66,35 +36,16 @@ void MpdEmcClusterKI::GetMomentum(TLorentzVector& p, const TVector3* vertex) con
     return;
   }
   double dx = fX, dy = fY, dz = fZ;
-  if (vertex) { // calculate direction from vertex
-    dx -= vertex->X();
-    dy -= vertex->Y();
-    dz -= vertex->Z();
-  }
 
-  Double_t r = TMath::Sqrt(dx * dx + dy * dy + dz * dz);
+  Double_t r = std::sqrt(dx * dx + dy * dy + dz * dz);
   if (r > 0) {
     p.SetPxPyPzE(fE * dx / r, fE * dy / r, fE * dz / r, fE);
   } else {
     p.SetPxPyPzE(0., 0., 0., 0.);
   }
 }
-// -----  Print  -----------------------------------------------------------
-
-void MpdEmcClusterKI::Print(const Option_t* opt) const
-{
-  cout << "MpdEmcClusterKI: " << endl;
-  cout << "\tDeposited energy: " << fE << "\tMean time: " << fTime << "\tDigits: " << fNDigits
-       << "   Rho cluster: " << GetRho() << "   Phi cluster: " << GetPhi() << "   Z cluster: " << fZ
-       << "   dPhi cluster: " << fdPhi << "   dZ cluster: " << fdZ << "   index cluster: " << fTrackId << endl;
-
-  cout << "\tNumber of tracks in module: " << fNPrimaries << endl;
-  for (int i = 0; i < fNPrimaries; i++)
-    cout << " " << fPrimId[i] << ", ";
-  cout << endl;
-}
 //____________________________________________________________________________
-void MpdEmcClusterKI::AddDigit(const MpdEmcDigitKI* digit, double energy)
+void Cluster::AddDigit(const Digit* digit, double energy)
 {
   // Add another digit to cluster:
   // increase full energy, re-calculate time if necessary, add MC info, add digit to list of digits
@@ -104,7 +55,7 @@ void MpdEmcClusterKI::AddDigit(const MpdEmcDigitKI* digit, double energy)
   }
   fE += energy;
   // check if this is contribution with highest energy
-  std::vector<pair<int, float>>::iterator elist = fDigitIDEnergy.begin();
+  std::vector<std::pair<int, float>>::iterator elist = fDigitIDEnergy.begin();
   bool found = false;
   while (elist != fDigitIDEnergy.end()) {
     if ((*elist).second > energy) {
@@ -117,7 +68,7 @@ void MpdEmcClusterKI::AddDigit(const MpdEmcDigitKI* digit, double energy)
     fTime = digit->GetTime();
   }
 
-  fDigitIDEnergy.emplace_back(digit->GetDetId(), energy);
+  fDigitIDEnergy.emplace_back(digit->GetCellId(), energy);
 
   // now add new primaries
   int nPrim = digit->GetNPrimaries();
@@ -139,7 +90,7 @@ void MpdEmcClusterKI::AddDigit(const MpdEmcDigitKI* digit, double energy)
   }
 }
 //____________________________________________________________________________
-void MpdEmcClusterKI::EvalAll()
+void Cluster::EvalAll()
 {
   // Calculate
   // Cluster coordinates
@@ -156,21 +107,19 @@ void MpdEmcClusterKI::EvalAll()
   // Eval position and dispersion
   double wtot = 0.;
   double x = 0.;
-  double y = 0.;
   double z = 0.;
-  double phi = 0.;
 
-  double dphiphi = 0.;
-  double dphiz = 0.;
+  double dxx = 0.;
+  double dxz = 0.;
   double dzz = 0.;
 
   fDisp = 0.;
   fLambda1 = 0;
   fLambda2 = 0;
 
-  MpdEmcGeoUtils* geom = MpdEmcGeoUtils::GetInstance();
-  MpdEmcSimParams* simParams = MpdEmcSimParams::GetInstance();
-  double logWeight = simParams->LogWeight();
+  const Geometry* geom = Geometry::Instance();
+  const SimParams* simParams = SimParams::Instance();
+  double logWeight = simParams->fLogWeight;
 
   // 1) Find covariance matrix elements:
   //    || dxx dxz ||
@@ -184,55 +133,38 @@ void MpdEmcClusterKI::EvalAll()
     float energy = (*digIterator).second;
     digIterator++;
 
-    double xi, yi, zi, w, phii;
-    geom->DetIdToGlobalPosition(detID, xi, yi, zi);
+    double xi, zi, w, phii;
+    geom->DetIdToLocalPosition(detID, xi, zi);
     if (energy > 0) {
       w = TMath::Max(0., logWeight + TMath::Log(energy / fE));
       x += w * xi;
-      y += w * yi;
       z += w * zi;
-      phii = ATan2(yi, xi);
-      // in case of cluster around 2pi: avoid averaging of delta and 2pi+delta
-      if (wtot > 0) { // not first digit
-        double phiCurrent = phi / wtot;
-        if (phii > phiCurrent + TMath::Pi()) {
-          phii -= TMath::TwoPi();
-        }
-        if (phii < phiCurrent - TMath::Pi()) {
-          phii += TMath::TwoPi();
-        }
-      }
-      phi += w * phii;
-      dphiphi += w * phii * phii;
-      dphiz += w * phii * zi;
+      dxx += w * xi * xi;
+      dxz += w * xi * zi;
       dzz += w * zi * zi;
       wtot += w;
     }
   }
   if (wtot > 0) {
     x /= wtot;
-    y /= wtot;
     z /= wtot;
-    double r = TMath::Sqrt(x * x + y * y);
-    phi = phi * r / wtot;
-    dphiphi = dphiphi * r * r / wtot;
-    dphiz = dphiz * r / wtot;
-    dphiphi -= phi * phi;
-    dphiz -= phi * z;
+    dxx = dxx / wtot;
+    dxz = dxz / wtot;
     dzz /= wtot;
+    dxx -= x * x;
+    dxz -= x * z;
     dzz -= z * z;
 
-    fLambda2 = 0.5 * (dphiphi + dzz) + TMath::Sqrt(0.25 * (dphiphi - dzz) * (dphiphi - dzz) + dphiz * dphiz);
-    fLambda1 = 0.5 * (dphiphi + dzz) - TMath::Sqrt(0.25 * (dphiphi - dzz) * (dphiphi - dzz) + dphiz * dphiz);
+    fLambda2 = 0.5 * (dxx + dzz) + std::sqrt(0.25 * (dxx - dzz) * (dxx - dzz) + dxz * dxz);
+    fLambda1 = 0.5 * (dxx + dzz) - std::sqrt(0.25 * (dxx - dzz) * (dxx - dzz) + dxz * dxz);
     if (fLambda2 > 0)
-      fLambda2 = sqrt(fLambda2);
+      fLambda2 = std::sqrt(fLambda2);
     if (fLambda1 > 0)
-      fLambda1 = sqrt(fLambda1);
+      fLambda1 = std::sqrt(fLambda1);
   } else {
     fLambda2 = fLambda1 = 0.;
   }
   fX = x;
-  fY = y;
   fZ = z;
 
   // calculates agreement of the cluster shape with parameterization in MpdEmcClusterizer::ShowerShape
@@ -240,32 +172,23 @@ void MpdEmcClusterKI::EvalAll()
   fChi2 = 0;
   int ndf = 0;
   fEcore = 0.;
-  fEcore1p = 0.;
-  fEcore2p = 0.;
   digIterator = fDigitIDEnergy.begin();
   while (digIterator != fDigitIDEnergy.end()) {
     int detID = (*digIterator).first;
     float energy = (*digIterator).second;
     digIterator++;
 
-    double xi, yi, zi;
-    geom->DetIdToGlobalPosition(detID, xi, yi, zi);
+    double xi, zi;
+    geom->DetIdToLocalPosition(detID, xi, zi);
     double dz = zi - fZ;
-    double dphi = TMath::Sqrt((xi - fX) * (xi - fX) + (yi - fY) * (yi - fY));
-    double ss = MpdEmcClusterizerKI::ShowerShape(dphi, dz);
+    double dx = xi - fX;
+    double ss = ShowerShape(dx, dz);
 
-    if (sqrt(dz * dz + dphi * dphi) < simParams->EcoreR()) {
+    if (sqrt(dz * dz + dx * dx) < simParams->fCoreR) {
       fEcore += energy;
     }
 
-    if (ss > simParams->EcoreCut1()) {
-      fEcore1p += energy;
-    }
-    if (ss > simParams->EcoreCut2()) {
-      fEcore2p += energy;
-    }
-
-    if (ss > simParams->Chi2radiusCut()) {
+    if (ss > simParams->fChi2radiusCut) {
       double sigma = 0.008 * ss * fE * (1 - ss); // TODO: What is the meaning of 0.008???
       if (sigma != 0) {
         fChi2 += pow(ss * fE - energy, 2) / sigma;
@@ -280,22 +203,22 @@ void MpdEmcClusterKI::EvalAll()
   }
 
   // Correct full energy
-  fE = simParams->ENonLinCorrection(0) + simParams->ENonLinCorrection(1) * fE;
+  fE = simParams->fCluNonLineaityA + simParams->fCluNonLineaityB * exp(-fE / simParams->fCluNonLineaityC);
 
   // Prepare for writing
   FillArrays();
 }
 
 //____________________________________________________________________________
-int MpdEmcClusterKI::GetNumberOfLocalMax(int* maxAt, float* maxAtEnergy) const
+int Cluster::GetNumberOfLocalMax(int* maxAt, float* maxAtEnergy) const
 {
   // Calculates the number of local maxima in the cluster using LocalMaxCut as the minimum
   // energy difference between maximum and surrounding digits
 
   int n = GetMultiplicity();
-  MpdEmcGeoUtils* geom = MpdEmcGeoUtils::GetInstance();
-  MpdEmcSimParams* simParams = MpdEmcSimParams::GetInstance();
-  float locMaxCut = simParams->LocalMaximumCut();
+  const Geometry* geom = Geometry::Instance();
+  const SimParams* simParams = SimParams::Instance();
+  float locMaxCut = simParams->fLocalMaximumCut;
 
   bool* isLocalMax = new bool[n];
   for (int i = 0; i < n; i++)
@@ -303,7 +226,7 @@ int MpdEmcClusterKI::GetNumberOfLocalMax(int* maxAt, float* maxAtEnergy) const
   {
     isLocalMax[i] = false;
     float en1 = fDigitIDEnergy[i].second;
-    if (en1 > simParams->ClusteringThreshold())
+    if (en1 > simParams->fClusteringThreshold)
       isLocalMax[i] = true;
   }
 
@@ -315,7 +238,7 @@ int MpdEmcClusterKI::GetNumberOfLocalMax(int* maxAt, float* maxAtEnergy) const
       int detId2 = fDigitIDEnergy[j].first;
       float en2 = fDigitIDEnergy[j].second;
 
-      if (geom->AreNeighboursVertex(detId1, detId2) == 1) {
+      if (geom->AreNeighbours(detId1, detId2) == 1) {
         if (en1 > en2) {
           isLocalMax[j] = false;
           // but may be digit too is not local max ?
@@ -339,8 +262,8 @@ int MpdEmcClusterKI::GetNumberOfLocalMax(int* maxAt, float* maxAtEnergy) const
       maxAt[iDigitN] = i;
       maxAtEnergy[iDigitN] = fDigitIDEnergy[i].second;
       iDigitN++;
-      if (iDigitN >= simParams->NLMMax()) { // Note that size of output arrays is limited:
-        LOG(error) << "Too many local maxima, cluster multiplicity " << n;
+      if (iDigitN >= kNLMMax) { // Note that size of output arrays is limited:
+        std::cout << "ERROR: Too many local maxima, cluster multiplicity " << n;
         return 0;
       }
     }
@@ -349,16 +272,16 @@ int MpdEmcClusterKI::GetNumberOfLocalMax(int* maxAt, float* maxAtEnergy) const
   return iDigitN;
 }
 //____________________________________________________________________________
-void MpdEmcClusterKI::Purify()
+void Cluster::Purify()
 {
   // Removes digits below threshold
   // If after purifying isolated digits remain, remove them too
 
-  MpdEmcGeoUtils* geom = MpdEmcGeoUtils::GetInstance();
-  MpdEmcSimParams* simParams = MpdEmcSimParams::GetInstance();
+  const Geometry* geom = Geometry::Instance();
+  const SimParams* simParams = SimParams::Instance();
   auto digIterator = fDigitIDEnergy.begin();
   while (digIterator != fDigitIDEnergy.end()) {
-    if (digIterator->second < simParams->DigitMinEnergy()) { // too soft, remove
+    if (digIterator->second < simParams->fDigitMinEnergy) { // too soft, remove
       digIterator = fDigitIDEnergy.erase(digIterator);
     } else {
       digIterator++;
@@ -390,7 +313,7 @@ void MpdEmcClusterKI::Purify()
       if (used[j]) // already used
         continue;
       int index2 = fDigitIDEnergy[j].first;
-      if (geom->AreNeighboursVertex(index1, index2) == 1) {
+      if (geom->AreNeighbours(index1, index2) == 1) {
         index[inClu] = j;
         inClu++;
         used[j] = true;
@@ -405,7 +328,7 @@ void MpdEmcClusterKI::Purify()
     }
   }
 }
-void MpdEmcClusterKI::FillArrays()
+void Cluster::FillArrays()
 {
   // As root is not able to handle std::map and std::vector, Fill arrays to store to disk
 
@@ -426,7 +349,7 @@ void MpdEmcClusterKI::FillArrays()
   std::sort(vec.begin(), vec.end(), compE);
 
   fNPrimaries = fMCTracks.size();
-  fNPrimaries = TMath::Min(fNPrimaries, MpdEmcSimParams::GetInstance()->NPrimMax());
+  fNPrimaries = std::min(fNPrimaries, SimParams::Instance()->fNPrimMax);
   fPrimId = new Int_t[fNPrimaries];
   fPrimE = new Float_t[fNPrimaries];
   i = 0;
@@ -438,18 +361,36 @@ void MpdEmcClusterKI::FillArrays()
     primIterator++;
   }
 }
-void MpdEmcClusterKI::CorrectVertex(double zVtx)
+//__________________________________________________________________________
+double Cluster::ShowerShape(double dx, double dz)
 {
-  // correct cluster position for Z ccordinate of vertex
-  // function is sA*sin(z/sW)+a+b*z, where sA,sW,a,b may depend on Zvtx and E
+  // Shower shape of EM cluster: proportion of energy in cell as a distancs dx,dz (phi,z directions)
+  // from the center of gravity of cluster.
+  // Due to projective geometry may also depend on Z coordinate. TODO: explore Z-dependence
 
-  MpdEmcSimParams* simParams = MpdEmcSimParams::GetInstance();
-  double logE = TMath::Log(fE); // NB: here we assume that energy already corrected for 1/3
+  // Parameterization from V.Riabov. TODO: verify with beam-test
 
-  double sA = simParams->ZcorrSinA(0) + simParams->ZcorrSinA(1) * logE; //-5.59366e-01 -2.67599e-02*logE
-  double sW = simParams->ZcorrSinW(0) + simParams->ZcorrSinW(1) * logE;
-  double a = (simParams->ZcorrA(0) + simParams->ZcorrA(1) * logE) * zVtx;
-  double b = simParams->ZcorrB(0) + simParams->ZcorrB(1) * logE;
-  fZ += (sA * TMath::Sin(fZ / sW) + a + b * fZ);
+  double frac = 0;
+  double x = std::sqrt(dx * dx + dz * dz);
+
+  if (x < 0.25)
+    return 0.73;
+
+  if (x < 4.5) {
+    frac = 7.55666e+000 * exp(-2.35773e+000 + 1.23342e-001 * x - 2.53958e-001 * x * x + 1.41214e-002 * x * x * x);
+  }
+  if (x >= 4.5 && x < 8.33) {
+    frac = 4.26832e-002 * exp(1.47109e+000 - 2.06712e-001 * x - 6.60220e-002 * x * x + 4.88207e-003 * x * x * x);
+  }
+  if (x >= 8.33 && x < 2.65 * 4) {
+    frac = 4.46227e-002 * exp(1.56817e+000 - 7.41051e-001 * x / 4 - 4.80563e-001 * x / 4 * x / 4);
+  }
+  if (x >= 2.65 * 4) {
+    frac = 1.24899e-002 * exp(3.60075e-001 - 8.15748e-001 * x / 4 - 3.74305e-002 * x / 4 * x / 4 * x / 4);
+  }
+
+  if (frac < 1e-24)
+    frac = 1e-24;
+
+  return frac;
 }
-ClassImp(MpdEmcClusterKI);

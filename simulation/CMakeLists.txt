@@ -1,7 +1,7 @@
 #Create a library called "libSimulation" which includes the source files given in the array.
 Set(LibName "Simulation")
 
-set(INCLUDE_DIRECTORIES ${ROOT_INCLUDE_DIR} ${PHOS256_SOURCE_DIR}/dataformats ${CMAKE_CURRENT_LIST_DIR})
+set(INCLUDE_DIRECTORIES ${ROOT_INCLUDE_DIR} ${PHOS256_SOURCE_DIR}/utils ${PHOS256_SOURCE_DIR}/dataformats ${CMAKE_CURRENT_LIST_DIR})
 
 Set(SYSTEM_INCLUDE_DIRECTORIES ${ROOT_INCLUDE_DIR})
 
@@ -12,9 +12,9 @@ set(LINK_DIRECTORIES ${ROOT_LIBRARY_DIR})
 link_directories(${LINK_DIRECTORIES})
 
 #List of source files
-set(SRCS  Geometry.cxx Hall.cxx Phos.cxx SimParams.cxx Stack.cxx GenBox.cxx MagField.cxx Digitizer.cxx Simulation.cxx)
+set(SRCS  Hall.cxx Phos.cxx Stack.cxx GenBox.cxx MagField.cxx Digitizer.cxx Simulation.cxx)
 
-set(HDRS Geometry.h Hall.h Phos.h SimParams.h Stack.h GenBox.h MagField.h Digitizer.h Simulation.h)
+set(HDRS Hall.h Phos.h Stack.h GenBox.h MagField.h Digitizer.h Simulation.h)
 
 #Generate the dictionary
 #It will create G_ARG1.cxx and G_ARG1.h / ARG1 = function first argument

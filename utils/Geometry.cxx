@@ -23,26 +23,6 @@
 
 Geometry* Geometry::fgGeom = nullptr;
 
-void Geometry::GetModuleAngles(float angle[3][2]) const
-{
-  // angle of the module positioned so than normal vector is in horizontal plane and polar angle theta to z direction
-  // A rotation matrix is described to GEANT by giving the polar and azimuthal angles of the axes of the DRS
-  //  (x′, y′, z′) in the MRS
-  angle[0][0] = fModuleAngle[0][0];
-  angle[0][1] = fModuleAngle[0][1];
-  angle[1][0] = fModuleAngle[1][0];
-  angle[1][1] = fModuleAngle[1][1];
-  angle[2][0] = fModuleAngle[2][0];
-  angle[2][1] = fModuleAngle[2][1];
-}
-void Geometry::GetModuleCenter(float pos[3]) const
-{
-  // Distance from IP to modeult center
-  pos[0] = fModuleCenter[0];
-  pos[0] = fModuleCenter[1];
-  pos[0] = fModuleCenter[2];
-}
-
 //____________________________________________________________________________
 Geometry::Geometry(float r, float theta) : fModR(r), fModTheta(theta)
 {
@@ -94,6 +74,59 @@ void Geometry::RelToAbsId(const int relid[2], Int_t& absId)
   //  absId = from 1 to fNModules * fNPhi * fNZ
   absId = (relid[0] - 1) * fNZ // the offset along phi
           + relid[1];          // the offset along z
+}
+
+bool Geometry::AbsToRelNumbering(int absId, int relid[2])
+{
+  // Converts the absolute numbering into the following array
+  //  relid[0] = Row number inside a PHOS module (Z coordinate)
+  //  relid[1] = Column number inside a PHOS module (x coordinate)
+  const int nZ = 8;   // nStripZ * nCellsZInStrip
+  const int nPhi = 8; // nStripZ * nCellsZInStrip
+  absId--;
+  relid[0] = 1 + absId / nZ;
+  relid[1] = absId - (relid[0] - 1) * nZ + 1;
+  return true;
+}
+
+void Geometry::DetIdToLocalPosition(int absId, double& x, double& z)
+{
+  int relid[2];
+  AbsToRelNumbering(absId, relid);
+
+  x = (relid[1] - 8 - 0.5) * CELLSTEP;
+  z = (relid[2] - 8 - 0.5) * CELLSTEP;
+}
+
+int Geometry::AreNeighbours(int absId1, int absId2)
+{
+
+  // Gives the neighbourness of two digits = 0 are not neighbour but continue searching
+  //                                       = 1 are neighbour
+  //                                       = 2 are not neighbour but do not continue searching
+  //                                       =-1 are not neighbour, continue searching, but do not look before d2 next
+  //                                       time
+  // neighbours are defined as digits having at least a common vertex
+  // The order of d1 and d2 is important: first (d1) should be a digit already in a cluster
+  //                                      which is compared to a digit (d2)  not yet in a cluster
+
+  int relid1[2];
+  AbsToRelNumbering(absId1, relid1);
+
+  int relid2[2];
+  AbsToRelNumbering(absId2, relid2);
+
+  int rowdiff = std::abs(relid1[0] - relid2[0]);
+  int coldiff = std::abs(relid1[1] - relid2[1]);
+
+  if (coldiff + rowdiff <= 1) { // Common side
+    return 1;
+  } else {
+    if ((relid2[0] > relid1[0]) && (relid2[1] > relid1[1] + 1)) {
+      return 2; //  Difference in row numbers is too large to look further
+    }
+  }
+  return 0;
 }
 
 // //____________________________________________________________________________
@@ -172,6 +205,28 @@ void Geometry::RelToAbsId(const int relid[2], Int_t& absId)
 //   angle += 3*TMath::Pi()/2.;
 //   center.SetXYZ(rDet*TMath::Cos(angle), rDet*TMath::Sin(angle), 0.);
 // }
+
+//=============Methods for geometry construction====================
+
+void Geometry::GetModuleAngles(float angle[3][2]) const
+{
+  // angle of the module positioned so than normal vector is in horizontal plane and polar angle theta to z direction
+  // A rotation matrix is described to GEANT by giving the polar and azimuthal angles of the axes of the DRS
+  //  (x′, y′, z′) in the MRS
+  angle[0][0] = fModuleAngle[0][0];
+  angle[0][1] = fModuleAngle[0][1];
+  angle[1][0] = fModuleAngle[1][0];
+  angle[1][1] = fModuleAngle[1][1];
+  angle[2][0] = fModuleAngle[2][0];
+  angle[2][1] = fModuleAngle[2][1];
+}
+void Geometry::GetModuleCenter(float pos[3]) const
+{
+  // Distance from IP to modeult center
+  pos[0] = fModuleCenter[0];
+  pos[0] = fModuleCenter[1];
+  pos[0] = fModuleCenter[2];
+}
 
 void Geometry::Init()
 {
