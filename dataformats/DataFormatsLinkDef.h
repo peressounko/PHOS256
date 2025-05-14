@@ -5,4 +5,5 @@
 
 #pragma link C++ class Hit + ;
 #pragma link C++ class Digit + ;
+#pragma link C++ class Cluster + ;
 #endif

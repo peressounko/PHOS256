@@ -124,7 +124,7 @@ void Simulation::InitOnWorker()
   // cout << "Simulation::InitForWorker " << this << endl;
 
   // Create Root manager
-  fRootManager = new TMCRootManager(GetName(), TMCRootManager::kWrite);
+  fRootManager = new TMCRootManager("PHSO256", TMCRootManager::kWrite);
   // fRootManager->SetDebug(true);
 
   // Set data to MC

@@ -5,8 +5,6 @@
 
 #pragma link C++ class Hall + ;
 #pragma link C++ class Phos + ;
-#pragma link C++ class Geometry + ;
-#pragma link C++ class SimParams + ;
 #pragma link C++ class Stack + ;
 #pragma link C++ class stack < TParticle*> + ;
 #pragma link C++ class GenBox + ;
