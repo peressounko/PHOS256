@@ -23,7 +23,7 @@ class Digitizer
   ~Digitizer() = default;
 
   void SetHits(std::vector<Hit>* hits) { fHits = hits; }
-  const TClonesArray* Digits() { return fDigits; }
+  void SetDigits(TClonesArray* digits) { fDigits = digits; }
 
   void ProcessEvent();
 

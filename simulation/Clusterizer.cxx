@@ -11,7 +11,7 @@
 #include "Digit.h"
 #include "Geometry.h"
 #include "SimParams.h"
-#include "CalibParams.h"
+// #include "CalibParams.h"
 #include "TFile.h"
 #include "TClonesArray.h"
 #include "TMath.h"
@@ -20,36 +20,17 @@
 //__________________________________________________________________________
 void Clusterizer::Init()
 {
-  // Get ROOT Manager
-  if (!fIsStandalone) {
-    FairRootManager* ioman = FairRootManager::Instance();
-    if (ioman == 0) {
-      LOG(error) << "RootManager not instantiated!";
-      return kERROR;
-    }
-    // Get input collection
-    fDigitsArray = (TClonesArray*)ioman->GetObject("Digit");
 
-    if (fDigitsArray == 0) {
-      LOG(error) << "Array of digits not found!";
-      return kERROR;
-    }
+  // // Temporary solution: get calibration from file TODO!!!!
+  // if (!fCalibData) {
 
-    // Create and register output array
-    fClustersArray = new TObjArray(); // Clusters may contain different number of digits=>TObjArray
-    ioman->Register("EmcCluster", "Emc", fClustersArray, true);
-  }
+  //   TString CalFile = "$VMCWORKDIR/input/MpdEmcCalib.root";
 
-  // Temporary solution: get calibration from file TODO!!!!
-  if (!fCalibData) {
+  //   TFile* f = new TFile(CalFile);
 
-    TString CalFile = "$VMCWORKDIR/input/MpdEmcCalib.root";
-
-    TFile* f = new TFile(CalFile);
-
-    fCalibData = (MpdEmcCalibParams*)f->Get("CalibrationDef");
-    cout << "ECAL: Read out EMC calib data" << endl;
-  }
+  //   fCalibData = (MpdEmcCalibParams*)f->Get("CalibrationDef");
+  //   cout << "ECAL: Read out EMC calib data" << endl;
+  // }
 
   // Class with list of parameters
   if (!fSimParams) {
@@ -88,15 +69,17 @@ void Clusterizer::PrepareDigits()
 
   // Remove digits below clustering threshold
   int n = fDigitsArray->GetEntriesFast();
+  double calib = fSimParams->fADCwidth;
   for (int i = 0; i < n; i++) {
     Digit* digit = static_cast<Digit*>(fDigitsArray->UncheckedAt(i));
     if (!digit) { // already removed e.g. by bad map selection
       continue;
     }
     // Calibrate energy
-    digit->SetE(digit->GetE() * fCalibData->GetGain(digit->GetCellId()));
+    // digit->SetE(digit->GetE() * fCalibData->GetGain(digit->GetCellId()));
+    digit->SetE(digit->GetE() * calib);
 
-    if (digit->GetE() < fSimParams->DigitMinEnergy()) {
+    if (digit->GetE() < fSimParams->fDigitMinEnergy) {
       fDigitsArray->RemoveAt(i);
     }
   }
@@ -128,11 +111,11 @@ void Clusterizer::MakeClusters()
     const Digit* digitSeed = static_cast<Digit*>(fDigitsArray->UncheckedAt(i));
 
     // is this digit so energetic that start cluster?
-    MpdEmcClusterKI* clu = nullptr;
+    Cluster* clu = nullptr;
     int iDigitInCluster = 0;
-    if (digitSeed->GetE() > fSimParams->ClusteringThreshold()) {
+    if (digitSeed->GetE() > fSimParams->fClusteringThreshold) {
       // start a new EMC RecPoint
-      clu = new MpdEmcClusterKI(digitSeed);
+      clu = new Cluster(digitSeed);
       fClustersArray->AddAtAndExpand(clu, fNumberOfClusters);
       fNumberOfClusters++;
       digitsUsed[i] = true;
@@ -144,9 +127,9 @@ void Clusterizer::MakeClusters()
     // Now scan remaining digits in list to find neigbours of our seed
     int index = 0;
     while (index < iDigitInCluster) { // scan over digits already in cluster
-      int digitInCluTowerId = clu->GetDigitTowerId(index);
+      int digitInCluTowerId = clu->GetDigitCellId(index);
       index++;
-      for (Int_t j = iFirst; j < nDigits;
+      for (int j = iFirst; j < nDigits;
            j++) { // upper limit not really matters, AreNeighbour stops this loop for too far digits
         if (digitsUsed[j]) {
           continue; // look through remaining digits
@@ -154,7 +137,7 @@ void Clusterizer::MakeClusters()
         const Digit* digitN = static_cast<Digit*>(fDigitsArray->UncheckedAt(j));
 
         // call (digit,digitN) in THAT oder !!!!!
-        Int_t ineb = fGeom->AreNeighbours(digitInCluTowerId, digitN->GetCellId());
+        int ineb = fGeom->AreNeighbours(digitInCluTowerId, digitN->GetCellId());
         switch (ineb) {
           case -1: // too early (e.g. previous sector), do not look before j at subsequent passes
             iFirst = j + 1;
@@ -162,13 +145,9 @@ void Clusterizer::MakeClusters()
           case 0: // not a neighbour
             continue;
           case 1: // are neighbours
-            // check if digits have consistent times
-            // Be VERY careful with this cut!!! Too strict may strongly modify your spectrum
-            if (std::fabs(digitN->GetTime() - clu->GetTime()) < fSimParams->ClusteringTimeGate()) {
-              clu->AddDigit(digitN);
-              iDigitInCluster++;
-              digitsUsed[j] = true;
-            }
+            clu->AddDigit(digitN);
+            iDigitInCluster++;
+            digitsUsed[j] = true;
             continue;
           case 2: // too far from each other, stop loop
           default:
@@ -186,18 +165,18 @@ void Clusterizer::MakeUnfoldings()
 {
   // Split cluster if several local maxima are found
 
-  if (!fSimParams->UnfoldClusters()) {
+  if (!fSimParams->fUnfoldClusters) {
     return;
   }
-  int* maxAt = new int[fSimParams->NLMMax()]; // NLMMax:Maximal number of local maxima
-  float* maxAtEnergy = new float[fSimParams->NLMMax()];
+  int* maxAt = new int[fSimParams->fNLMMax]; // NLMMax:Maximal number of local maxima
+  float* maxAtEnergy = new float[fSimParams->fNLMMax];
 
-  float localMaxCut = fSimParams->LocalMaximumCut();
+  float localMaxCut = fSimParams->fLocalMaximumCut;
   int numberOfNotUnfolded = fNumberOfClusters;
   for (int index = 0; index < numberOfNotUnfolded; index++) {
-    MpdEmcClusterKI* clu = static_cast<MpdEmcClusterKI*>(fClustersArray->At(index));
+    Cluster* clu = static_cast<Cluster*>(fClustersArray->At(index));
 
-    Int_t nMultipl = clu->GetMultiplicity();
+    int nMultipl = clu->GetMultiplicity();
     int nMax = clu->GetNumberOfLocalMax(maxAt, maxAtEnergy);
     if (nMax > 1) {
       UnfoldOneCluster(clu, nMax, maxAt, maxAtEnergy);
@@ -215,7 +194,7 @@ void Clusterizer::MakeUnfoldings()
   delete[] maxAtEnergy;
 }
 //____________________________________________________________________________
-void Clusterizer::UnfoldOneCluster(MpdEmcClusterKI* iniClu, Int_t nMax, int* digitId, float* maxAtEnergy)
+void Clusterizer::UnfoldOneCluster(Cluster* iniClu, int nMax, int* digitId, float* maxAtEnergy)
 {
   // Performs the unfolding of a cluster with nMax overlapping showers
   // Parameters: iniClu cluster to be unfolded
@@ -227,33 +206,28 @@ void Clusterizer::UnfoldOneCluster(MpdEmcClusterKI* iniClu, Int_t nMax, int* dig
   // To avoid multiple re-calculation of same parameters
   int mult = iniClu->GetMultiplicity();
   std::vector<double> x(mult);
-  std::vector<double> y(mult);
   std::vector<double> z(mult);
   std::vector<double> e(mult);
   std::vector<std::vector<double>> eInClusters(mult, std::vector<double>(nMax));
 
   for (int idig = 0; idig < mult; idig++) {
-    Int_t detID;
-    Float_t eDigit;
-    ;
+    int detID;
+    float eDigit;
     iniClu->GetTransientDigitParams(idig, detID, eDigit);
     e[idig] = eDigit;
-    double lx, ly, lz;
-    fGeom->DetIdToGlobalPosition(detID, lx, ly, lz);
+    double lx, lz;
+    fGeom->DetIdToLocalPosition(detID, lx, lz);
     x[idig] = lx;
-    y[idig] = ly;
     z[idig] = lz;
   }
 
   // Coordinates of centers of clusters
   std::vector<double> xMax(nMax);
-  std::vector<double> yMax(nMax);
   std::vector<double> zMax(nMax);
   std::vector<double> eMax(nMax);
 
   for (int iclu = 0; iclu < nMax; iclu++) {
     xMax[iclu] = x[digitId[iclu]];
-    yMax[iclu] = y[digitId[iclu]];
     zMax[iclu] = z[digitId[iclu]];
     eMax[iclu] = e[digitId[iclu]];
   }
@@ -263,14 +237,13 @@ void Clusterizer::UnfoldOneCluster(MpdEmcClusterKI* iniClu, Int_t nMax, int* dig
   // Try to decompose cluster to contributions
   int nIterations = 0;
   bool insuficientAccuracy = true;
-  while (insuficientAccuracy && nIterations < fSimParams->NMaxIterations()) {
+  while (insuficientAccuracy && nIterations < fSimParams->fNMaxIterations) {
     // Loop over all digits of parent cluster and split their energies between daughter clusters
     // according to shower shape
     for (int idig = 0; idig < mult; idig++) {
       double eEstimated = 0;
       for (int iclu = 0; iclu < nMax; iclu++) {
-        prop[iclu] = eMax[iclu] * Cluster::ShowerShape(sqrt((x[idig] - xMax[iclu]) * (x[idig] - xMax[iclu]) +
-                                                            (y[idig] - yMax[iclu]) * (y[idig] - yMax[iclu])),
+        prop[iclu] = eMax[iclu] * Cluster::ShowerShape(x[idig] - xMax[iclu],
                                                        z[idig] - zMax[iclu]);
         eEstimated += prop[iclu];
       }
@@ -286,7 +259,6 @@ void Clusterizer::UnfoldOneCluster(MpdEmcClusterKI* iniClu, Int_t nMax, int* dig
     insuficientAccuracy = false; // will be true if at least one parameter changed too much
     for (int iclu = 0; iclu < nMax; iclu++) {
       double oldX = xMax[iclu];
-      double oldY = yMax[iclu];
       double oldZ = zMax[iclu];
       double oldE = eMax[iclu];
       // new energy, need for weight
@@ -295,50 +267,46 @@ void Clusterizer::UnfoldOneCluster(MpdEmcClusterKI* iniClu, Int_t nMax, int* dig
         eMax[iclu] += eInClusters[idig][iclu];
       }
       xMax[iclu] = 0;
-      yMax[iclu] = 0;
       zMax[iclu] = 0.;
       double wtot = 0.;
       for (int idig = 0; idig < mult; idig++) {
-        double w = std::max(std::log(eInClusters[idig][iclu] / eMax[iclu]) + fSimParams->LogWeight(), 0.);
+        double w = std::max(std::log(eInClusters[idig][iclu] / eMax[iclu]) + fSimParams->fLogWeight, 0.);
         xMax[iclu] += x[idig] * w;
-        yMax[iclu] += y[idig] * w;
         zMax[iclu] += z[idig] * w;
         wtot += w;
       }
       if (wtot > 0.) {
         xMax[iclu] /= wtot;
-        yMax[iclu] /= wtot;
         zMax[iclu] /= wtot;
       }
       // Compare variation of parameters
-      insuficientAccuracy += (std::abs(eMax[iclu] - oldE) > fSimParams->UnfogingEAccuracy());
-      insuficientAccuracy += (std::abs(xMax[iclu] - oldX) > fSimParams->UnfogingXZAccuracy());
-      insuficientAccuracy += (std::abs(yMax[iclu] - oldY) > fSimParams->UnfogingXZAccuracy());
-      insuficientAccuracy += (std::abs(zMax[iclu] - oldZ) > fSimParams->UnfogingXZAccuracy());
+      insuficientAccuracy += (std::abs(eMax[iclu] - oldE) > fSimParams->fUnfogingEAccuracy);
+      insuficientAccuracy += (std::abs(xMax[iclu] - oldX) > fSimParams->fUnfogingXZAccuracy);
+      insuficientAccuracy += (std::abs(zMax[iclu] - oldZ) > fSimParams->fUnfogingXZAccuracy);
     }
     nIterations++;
   }
 
   // Iterations finished, add new clusters
   for (int iclu = 0; iclu < nMax; iclu++) {
-    MpdEmcClusterKI* clu = new MpdEmcClusterKI();
+    Cluster* clu = new Cluster();
     fClustersArray->AddAtAndExpand(clu, fNumberOfClusters + iclu);
     clu->SetNLM(nMax);
   }
   for (int idig = 0; idig < mult; idig++) {
-    Int_t detID;
-    Float_t eDigit;
+    int detID;
+    float eDigit;
     ;
     iniClu->GetTransientDigitParams(idig, detID, eDigit);
     Digit testdigit(detID, 0, 0, 0);                     // test digit
     int jdigit = fDigitsArray->BinarySearch(&testdigit); // Look for digit with same detID
     if (jdigit == -1) {
-      LOG(error) << "Clusterizer::UnfoldOneCluster: Can not find Digit with detID=" << detID;
+      std::cout << "Clusterizer::UnfoldOneCluster: Can not find Digit with detID=" << detID << std::endl;
       continue;
     }
     Digit* digit = static_cast<Digit*>(fDigitsArray->At(jdigit));
     for (int iclu = 0; iclu < nMax; iclu++) {
-      MpdEmcClusterKI* clu = static_cast<MpdEmcClusterKI*>(fClustersArray->UncheckedAt(fNumberOfClusters + iclu));
+      Cluster* clu = static_cast<Cluster*>(fClustersArray->UncheckedAt(fNumberOfClusters + iclu));
       clu->AddDigit(digit, eInClusters[idig][iclu]); // Fills geometry and MC infor from Digit,+ correct energy
     }
   }
@@ -349,10 +317,9 @@ void Clusterizer::EvalClusters()
 {
   // Calculate cluster properties
   int n = fClustersArray->GetEntriesFast();
-  LOG(debug) << "EvalCluProperties: nclu=" << n;
 
   for (int i = 0; i < n; i++) {
-    MpdEmcClusterKI* clu = static_cast<MpdEmcClusterKI*>(fClustersArray->UncheckedAt(i));
+    Cluster* clu = static_cast<Cluster*>(fClustersArray->UncheckedAt(i));
     // Remove remaining digits below threshold, e.g. after unfolding
     clu->Purify();
     // Eval all variables: Energy, CoreEnergy, position, Dispersion,...

@@ -33,6 +33,7 @@ class Stack : public TVirtualMCStack
   virtual int GetCurrentTrackNumber() const;
   virtual int GetCurrentParentTrackNumber() const;
   TParticle* GetParticle(int id) const;
+  TClonesArray* GetParticles() { return fParticles; }
 
  private:
   // data members

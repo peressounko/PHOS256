@@ -4,6 +4,8 @@
 /// \file Simulation.h
 /// \brief Definition of the Simulation class
 ///
+#include "TFile.h"
+#include "TTree.h"
 #include "TMCVerbose.h"
 #include <TGeoUniformMagField.h>
 #include <TVirtualMCApplication.h>
@@ -17,6 +19,7 @@
 #include "MagField.h"
 #include "GenBox.h"
 #include "Digitizer.h"
+#include "Clusterizer.h"
 
 #include "Hit.h"
 #include "Digit.h"
@@ -61,10 +64,17 @@ class Simulation : public TVirtualMCApplication
   // Calorimeter description
   Hall* fHall = nullptr;
   Phos* fPHOS = nullptr;
+
+  // processors
   Digitizer* fDigitizer = nullptr;
-  // Digitizer *fDigitozer = nullptr;
+  Clusterizer* fClusterizer = nullptr;
+  // Data collections
   std::vector<Hit> fHits;
-  std::vector<Digit> fDigits;
+  TClonesArray* fDigits = nullptr; //
+  TObjArray* fClusters = nullptr;
+
+  TTree* fTree = nullptr;
+  TFile* fOutFile = nullptr;
 
   ClassDef(Simulation, 1) // Interface to MonteCarlo application
 };

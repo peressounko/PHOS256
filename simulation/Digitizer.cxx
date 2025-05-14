@@ -27,13 +27,12 @@ void Digitizer::ProcessEvent()
   if (!fHits) {
     return;
   }
-
   // Reset output Array
-  if (!fDigits) {
-    fDigits = new TClonesArray("Digit", 100);
+  if (fDigits) {
+    fDigits->Clear();
   } else {
     // Reset output Array
-    fDigits->Clear();
+    std::cout << "ERROR: fDigits not set!!!" << std::endl;
   }
   int nDigits = 0;
 
@@ -112,8 +111,6 @@ void Digitizer::ProcessEvent()
       }
     }
   }
-
-  std::cout << "Emc Hits done:" << fDigits->GetEntriesFast() << std::endl;
 }
 
 //_______________________________________________________________________

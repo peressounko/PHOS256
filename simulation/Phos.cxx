@@ -76,6 +76,7 @@ void Phos::FinishPrimary()
 //____________________________________________________________________________
 void Phos::FinishEvent()
 {
+
   // Sort Hits
   // Add duplicates if any and remove them
   if (!fHits || fHits->size() == 0) {
@@ -129,6 +130,10 @@ bool Phos::ProcessHits()
   // 1. Remember all particles first entered PHOS (active medium)
   // 2. Collect all energy depositions in Cell by all secondaries from particle first entered PHOS
 
+  if (std::strcmp(TVirtualMC::GetMC()->CurrentVolName(), "PXTL")) {
+    return false;
+  }
+
   // Check if this is first entered PHOS particle ("SuperParent")
   Stack* stack = static_cast<Stack*>(TVirtualMC::GetMC()->GetStack());
   const int partID = stack->GetCurrentTrackNumber();
@@ -174,6 +179,7 @@ bool Phos::ProcessHits()
   int cell;
   TVirtualMC::GetMC()->CurrentVolOffID(2, cell); // 2: number of geom levels between PXTL and cell: get sell in strip number.
   int detID = Geometry::RelToAbsId(moduleNumber, strip, cell);
+
   if (superParent == fCurentSuperParent && detID == fCurrentCellID && fCurrentHit) {
     // continue with current hit
     fCurrentHit->AddEnergy(lostenergy);

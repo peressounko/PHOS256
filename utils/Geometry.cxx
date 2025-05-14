@@ -24,7 +24,7 @@
 Geometry* Geometry::fgGeom = nullptr;
 
 //____________________________________________________________________________
-Geometry::Geometry(float r, float theta) : fModR(r), fModTheta(theta)
+Geometry::Geometry(float r, float theta) : fIPtoCrystalSurface(r), fModTheta(theta)
 {
   Init();
 
@@ -234,9 +234,6 @@ void Geometry::Init()
   // Coordinate system chosen: x across beam, z along beam, y out of beam.
   // Reference point for all volumes incide module is
   // center of module in x,z on the upper surface of support beam
-
-  // Distance from IP to surface of the crystals
-  fIPtoCrystalSurface = 460.0;
 
   // CRYSTAL
 

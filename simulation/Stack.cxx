@@ -68,14 +68,15 @@ void Stack::PushTrack(int toBeDone, int parent, int pdg,
   const int kFirstDaughter = -1;
   const int kLastDaughter = -1;
 
-  TClonesArray& particlesRef = *fParticles;
   int trackId = GetNtrack();
-  TParticle* particle = new (particlesRef[trackId]) TParticle(pdg, is, parent,
-                                                              trackId, kFirstDaughter, kLastDaughter, px, py, pz, e, vx, vy, vz, tof);
+  TParticle* particle = new ((*fParticles)[trackId]) TParticle(pdg, is, parent,
+                                                               trackId, kFirstDaughter, kLastDaughter, px, py, pz, e, vx, vy, vz, tof);
 
   particle->SetPolarisation(polx, poly, polz);
   particle->SetWeight(weight);
   particle->SetUniqueID(mech);
+
+  // Info("PushTrack","toBeDone=%d, parent=%d, pdg=%d, fNPrimary=%d",toBeDone,parent,pdg, fNPrimary);
 
   if (parent < 0)
     fNPrimary++;
@@ -117,7 +118,7 @@ TParticle* Stack::PopPrimaryForTracking(int i)
   /// \param i  The index of primary particle to be popped
 
   if (i < 0 || i >= fNPrimary)
-    Fatal("GetPrimaryForTracking", "Index out of range");
+    Fatal("GetPrimaryForTracking", "Index %d out of range %d", i, fNPrimary);
 
   return (TParticle*)fParticles->At(i);
 }

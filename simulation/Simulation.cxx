@@ -15,7 +15,6 @@
 
 #include "Phos.h"
 #include "Simulation.h"
-// #include "A01MagField.h"
 #include "GenBox.h"
 #include "Stack.h"
 
@@ -28,8 +27,6 @@ Simulation::Simulation(const Simulation* s)
 void Simulation::InitMC(std::string configName)
 {
   // Initialize containers
-
-  std::cout << "InitMC" << std::endl;
 
   if (configName.size()) {
     gROOT->LoadMacro(configName.data());
@@ -51,6 +48,7 @@ void Simulation::InitMC(std::string configName)
   if (fRootManager) {
     fRootManager->Register("stack", "Stack", &fStack);
   }
+
   // Set data to MC
   gMC->SetStack(fStack);
 
@@ -65,6 +63,10 @@ void Simulation::InitMC(std::string configName)
 
   gMC->Init();
   gMC->BuildPhysics();
+
+  fOutFile = TFile::Open("PHOSReco.root", "recreate");
+  fTree = new TTree("PHOS256", "Reconstruction tree");
+  fTree->Branch("MCParticles", "TClonesArray", fStack->GetParticles(), 32000, 99);
 }
 //_____________________________________________________________________________
 void Simulation::ConstructGeometry()
@@ -79,7 +81,7 @@ void Simulation::ConstructGeometry()
 
   // construct GEANT geometry
   if (!fPHOS)
-    fPHOS = new Phos(1., 20.); // Make configurable
+    fPHOS = new Phos(50., 90.); // Make configurable
   fPHOS->SetHitContainer(&fHits);
   fPHOS->CreateMaterials();
   fPHOS->CreateGeometry(); // creates the geometry for GEANT
@@ -90,9 +92,6 @@ void Simulation::RunMC(Int_t nofEvents)
 {
   /// Run MC.
   /// \param nofEvents Number of events to be processed
-
-  cout << "Simulation:: RunMC start" << endl;
-
   gMC->ProcessRun(nofEvents);
   FinishRun();
 }
@@ -101,12 +100,15 @@ void Simulation::RunMC(Int_t nofEvents)
 void Simulation::FinishRun()
 {
   /// Finish MC run.
-  std::cout << "Finish Run" << std::endl;
 
   if (fRootManager) {
     fRootManager->WriteAll();
     fRootManager->Close();
   }
+
+  fOutFile->cd();
+  fTree->Write();
+  fOutFile->Close();
 
   gGeoManager->Export("geometry.root");
 }
@@ -170,7 +172,17 @@ void Simulation::BeginEvent()
   if (!fDigitizer) {
     fDigitizer = new Digitizer();
     fDigitizer->SetHits(&fHits);
-    fRootManager->Register("Digits", "TClonesArray", fDigitizer->Digits());
+    fDigits = new TClonesArray("Digit", 10);
+    fDigitizer->SetDigits(fDigits);
+    fTree->Branch("Digits", &fDigits, 32000, 99);
+  }
+  if (!fClusterizer) {
+    fClusterizer = new Clusterizer();
+    fClusterizer->Init();
+    fClusters = new TObjArray();
+    fClusterizer->SetDigits(fDigits);
+    fClusterizer->SetClusters(fClusters);
+    fTree->Branch("Clusters", &fClusters, 32000, 99);
   }
 }
 
@@ -204,9 +216,15 @@ void Simulation::FinishEvent()
 
   // Call detectors
   fPHOS->FinishEvent();
-  fDigitizer->ProcessEvent();
+  if (fDigitizer) {
+    fDigitizer->ProcessEvent();
+  }
+  if (fClusterizer) {
+    fClusterizer->ProcessEvent();
+  }
 
-  fRootManager->Fill();
+  // fRootManager->Fill();
+  fTree->Fill();
 
-  //  fStack->Reset();
+  fStack->Reset();
 }

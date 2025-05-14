@@ -10,19 +10,19 @@
 // Base Class Headers ----------------
 #include <map>
 
-class TClonesArray;
-class TObjArray;
-class MpdEmcSimParams;
-class MpdEmcGeoUtils;
-class MpdEmcClusterKI;
-class MpdEmcCalibParams;
+#include "TClonesArray.h"
+#include "TObjArray.h"
+#include "SimParams.h"
+#include "Geometry.h"
+#include "Cluster.h"
+// class CalibParams;
 
 class Clusterizer
 {
  public:
   // Constructors/Destructors ---------
   Clusterizer() = default;
-  ~Clusterizer() = default;
+  virtual ~Clusterizer() {}
 
   void Init();
 
@@ -30,14 +30,14 @@ class Clusterizer
 
   // functions to be used in special case of re-reconstruction
   void SetDigits(TClonesArray* digits) { fDigitsArray = digits; }
-  TObjArray* Clusters() { return fClustersArray; }
-  void SetCalibParams(CalibParams* calib) { fCalibData = calib; }
+  void SetClusters(TObjArray* clus) { fClustersArray = clus; }
+  // void SetCalibParams(CalibParams* calib) { fCalibData = calib; }
 
  protected:
   void PrepareDigits();  // Calibrate, Allpy BadMap, clean...
   void MakeClusters();   // Do the job
   void MakeUnfoldings(); // Find and unfold clusters with few local maxima
-  void UnfoldOneCluster(MpdEmcClusterKI* iniClu, Int_t nMax, int* digitId, float* maxAtEnergy);
+  void UnfoldOneCluster(Cluster* iniClu, int nMax, int* digitId, float* maxAtEnergy);
   // Performs the unfolding of a cluster with nMax overlapping showers
   // Parameters: iniClu cluster to be unfolded
   //             nMax number of local maxima found (this is the number of new clusters)
@@ -46,11 +46,12 @@ class Clusterizer
   void EvalClusters();
 
  private:
-  TClonesArray* fDigitsArray = nullptr; //! Input digits array
-  TObjArray* fClustersArray = nullptr;  //! output clusters array
-  SimParams* fSimParams = nullptr;      //! Configuration parameters
-  Geometry* fGeom = nullptr;            //! Geometry class
-  CalibParams* fCalibData = nullptr;    //! Calibration parameters
+  int fNumberOfClusters = 0;             //! total number of clusters
+  TClonesArray* fDigitsArray = nullptr;  //! Input digits array
+  TObjArray* fClustersArray = nullptr;   //! output clusters array
+  const SimParams* fSimParams = nullptr; //! Configuration parameters
+  const Geometry* fGeom = nullptr;       //! Geometry class
+  // CalibParams* fCalibData = nullptr;   //! Calibration parameters
   ClassDef(Clusterizer, 1);
 };
 

@@ -77,6 +77,8 @@ class SimParams : public TObject
   float fCluNonLineaityB = 0.109;      ///< Energy scale of cluster non-linearity
   float fCluNonLineaityC = 1.;         ///< Overall calibration
   int fNPrimMax = 5;                   ///< maximal number of primary particles per cluster
+  int fNLMMax = 30;                    ///< maximal numner of local maxima
+  int fNMaxIterations = 100;           ///< max number of iterations in unfolding
 
  protected:
   static SimParams* fgSimParams;

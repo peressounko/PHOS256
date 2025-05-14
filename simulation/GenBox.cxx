@@ -65,6 +65,24 @@ void GenBox::Generate()
     p[2] = pmom * TMath::Cos(theta);
 
     // Add particle to stack
+    /// \param toBeDone  1 if particles should go to tracking, 0 otherwise
+    /// \param parent    number of the parent track, -1 if track is primary
+    /// \param pdg       PDG encoding
+    /// \param px        particle momentum - x component [GeV/c]
+    /// \param py        particle momentum - y component [GeV/c]
+    /// \param pz        particle momentum - z component [GeV/c]
+    /// \param e         total energy [GeV]
+    /// \param vx        position - x component [cm]
+    /// \param vy        position - y component  [cm]
+    /// \param vz        position - z component  [cm]
+    /// \param tof       time of flight [s]
+    /// \param polx      polarization - x component
+    /// \param poly      polarization - y component
+    /// \param polz      polarization - z component
+    /// \param mech      creator process VMC code
+    /// \param ntr       track number (is filled by the stack)
+    /// \param weight    particle weight
+    /// \param is        generation status code
     fStack->PushTrack(toBeDone, -1, fIpart, p[0], p[1], p[1], e, origin[0], origin[1], origin[0], time, polx,
                       poly, polz, kPPrimary, ntr, 1., 0);
   }
