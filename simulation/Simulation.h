@@ -36,6 +36,12 @@ class Simulation : public TVirtualMCApplication
   void RunMC(Int_t nofEvents);
   void FinishRun();
 
+  void SetRTheta(double r = 100, double theta = 20)
+  {
+    fRad = r;
+    fTheta = theta;
+  }
+
   virtual TVirtualMCApplication* CloneForWorker() const;
   virtual void InitOnWorker();
   virtual void FinishRunOnWorker();
@@ -56,6 +62,9 @@ class Simulation : public TVirtualMCApplication
  private:
   mutable TMCRootManager* fRootManager; //!< Root manager
   bool fIsMaster = true;                ///< If is on master thread
+
+  double fRad = 100.;
+  double fTheta = 20.;
 
   Stack* fStack = nullptr;       ///< VMC stack
   GenBox* fGenerator = nullptr;  ///< Primary generator

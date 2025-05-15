@@ -81,7 +81,7 @@ void Simulation::ConstructGeometry()
 
   // construct GEANT geometry
   if (!fPHOS)
-    fPHOS = new Phos(50., 90.); // Make configurable
+    fPHOS = new Phos(fRad, fTheta); // Make configurable
   fPHOS->SetHitContainer(&fHits);
   fPHOS->CreateMaterials();
   fPHOS->CreateGeometry(); // creates the geometry for GEANT

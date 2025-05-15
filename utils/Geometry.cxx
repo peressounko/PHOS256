@@ -224,8 +224,8 @@ void Geometry::GetModuleCenter(float pos[3]) const
 {
   // Distance from IP to modeult center
   pos[0] = fModuleCenter[0];
-  pos[0] = fModuleCenter[1];
-  pos[0] = fModuleCenter[2];
+  pos[1] = fModuleCenter[1];
+  pos[2] = fModuleCenter[2];
 }
 
 void Geometry::Init()
@@ -331,7 +331,8 @@ void Geometry::Init()
 
   fAlCoverThickness = 0.1; // Thickness of the Al cover of the module
 
-  fOuterThermoWidthXUp = 156.0 - fAlCoverThickness;
+  //  fOuterThermoWidthXUp = 156.0 - fAlCoverThickness;
+  fOuterThermoWidthXUp = 50.0 - fAlCoverThickness;
   // width of the upper surface of the PHOS module accross the beam
   fOuterThermoWidthY = 6.0; // with of the upper cover of outer thermoinsulation
   fOuterThermoWidthZ = 6.0; // width of the thermoinsulation along the beam
@@ -368,8 +369,9 @@ void Geometry::Init()
 
   //============Now warm section======================
   // Al Cover
-  fWarmAlCoverWidthX = 2 * fAlCoverParams[1]; // Across beam
-  fWarmAlCoverWidthY = 159.0;                 // along beam
+  fWarmAlCoverWidthX = 2 * fAlCoverParams[0]; // Across beam
+  // fWarmAlCoverWidthY = 159.0;              // along beam
+  fWarmAlCoverWidthY = 2 * fAlCoverParams[2]; // along beam
 
   // T-support
   fTSupport1Thickness = 3.5;
@@ -380,9 +382,11 @@ void Geometry::Init()
   fTSupportDist = 7.48;
 
   // Air space for FEE
-  fAirSpaceFeeX = 148.6; // Across beam
-  fAirSpaceFeeY = 135.0; // along beam
-  fAirSpaceFeeZ = 19.0;  // out of beam
+  // fAirSpaceFeeX = 148.6; // Across beam
+  // fAirSpaceFeeY = 135.0; // along beam
+  fAirSpaceFeeX = 30.;  // Across beam
+  fAirSpaceFeeY = 30.0; // along beam
+  fAirSpaceFeeZ = 19.0; // out of beam
 
   // thermoinsulation
   fWarmBottomThickness = 4.0;
@@ -491,7 +495,7 @@ void Geometry::Init()
   fFEEAirPosition[1] = 0;
   fFEEAirPosition[2] = fWarmThermoHalfSize[2] - fWarmBottomThickness - fFEEAirHalfSize[2];
 
-  // --- Calculate the oveol dimentions of the EMC module
+  // --- Calculate the overal dimentions of the EMC module
 
   fEMCParams[3] = fAlCoverParams[3] + fWarmAlCoverHalfSize[2];                                                     // Size out of beam
   fEMCParams[0] = fAlCoverParams[0];                                                                               // Upper size across the beam
@@ -513,9 +517,9 @@ void Geometry::Init()
   //  (x′, y′, z′) in the MRS
   fModuleAngle[0][0] = 90.;
   fModuleAngle[0][1] = 0.;
-  fModuleAngle[1][0] = 90. - fModTheta;
+  fModuleAngle[1][0] = 90. + fModTheta;
   fModuleAngle[1][1] = 90.;
-  fModuleAngle[2][0] = 180. - fModTheta;
+  fModuleAngle[2][0] = -fModTheta;
   fModuleAngle[2][1] = -90.;
 
   fModuleCenter[0] = 0;

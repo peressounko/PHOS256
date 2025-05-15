@@ -357,10 +357,14 @@ void Phos::CreateGeometryforEMC()
   gGeoManager->Node("PAGA", 1, "PCOR", 0.0, y, 0.0, 0, true, ubuf);
 
   // ------- define the outer thermoinsulating cover
-  for (ipar = 0; ipar < 4; ipar++)
-    par[ipar] = *(geom->GetOuterThermoParams() + ipar);
+  // for (ipar = 0; ipar < 4; ipar++)
+  //   par[ipar] = *(geom->GetOuterThermoParams() + ipar);
+  par[0] = *(geom->GetOuterThermoParams() + 0);
+  par[1] = *(geom->GetOuterThermoParams() + 2);
+  par[2] = *(geom->GetOuterThermoParams() + 3);
   imed = gGeoManager->GetMedium("FOAM")->GetId();
-  gGeoManager->Volume("PTIO", "TRD1", imed, par, 4);
+  // gGeoManager->Volume("PTIO", "TRD1", imed, par, 4); // !!!
+  gGeoManager->Volume("PTIO", "BOX", imed, par, 3);
   const float* outparams = geom->GetOuterThermoParams();
 
   int idrotm = 0;
@@ -371,10 +375,14 @@ void Phos::CreateGeometryforEMC()
   gGeoManager->Node("PCOR", 1, "PTIO", 0., 0.0, z, idrotm, true, ubuf);
 
   // -------- Define the outer Aluminium cover -----
-  for (ipar = 0; ipar < 4; ipar++)
-    par[ipar] = *(geom->GetAlCoverParams() + ipar);
+  // for (ipar = 0; ipar < 4; ipar++)
+  //   par[ipar] = *(geom->GetAlCoverParams() + ipar);
+  par[0] = *(geom->GetAlCoverParams() + 0);
+  par[1] = *(geom->GetAlCoverParams() + 2);
+  par[2] = *(geom->GetAlCoverParams() + 3);
   imed = gGeoManager->GetMedium("AL")->GetId();
-  gGeoManager->Volume("PCOL", "TRD1", imed, par, 4);
+  // gGeoManager->Volume("PCOL", "TRD1", imed, par, 4);  //!!!
+  gGeoManager->Volume("PCOL", "BOX", imed, par, 3);
 
   const float* covparams = geom->GetAlCoverParams();
   z = covparams[3] - outparams[3];
@@ -395,8 +403,8 @@ void Phos::CreateGeometryforEMC()
     par[ipar] = *(geom->GetWarmAlCoverHalfSize() + ipar);
   imed = gGeoManager->GetMedium("AL")->GetId();
   gGeoManager->Volume("PWAR", "BOX ", imed, par, 3);
-  const float* warmcov = geom->GetWarmAlCoverHalfSize();
 
+  const float* warmcov = geom->GetWarmAlCoverHalfSize();
   // --- Define the outer thermoinsulation ---
   for (ipar = 0; ipar < 3; ipar++)
     par[ipar] = *(geom->GetWarmThermoHalfSize() + ipar);
@@ -504,10 +512,15 @@ void Phos::CreateGeometryforEMC()
   gGeoManager->Node("PAFE", 1, "PWTI", posit7[0], posit7[1], posit7[2], 0, true, ubuf);
 
   // Define the EMC module volume and combine Cool and Warm sections
-  for (ipar = 0; ipar < 4; ipar++)
-    par[ipar] = *(geom->GetPHOSParams() + ipar);
+  // for (ipar = 0; ipar < 4; ipar++)
+  //   par[ipar] = *(geom->GetPHOSParams() + ipar);
+  par[0] = *(geom->GetPHOSParams() + 0);
+  par[1] = *(geom->GetPHOSParams() + 2);
+  par[2] = *(geom->GetPHOSParams() + 3);
   imed = gGeoManager->GetMedium("AIR")->GetId();
-  gGeoManager->Volume("PEMC", "TRD1", imed, par, 4);
+  //  gGeoManager->Volume("PEMC", "TRD1", imed, par, 4);
+  gGeoManager->Volume("PEMC", "BOX", imed, par, 3);
+
   z = -warmcov[2];
   gGeoManager->Node("PCOL", 1, "PEMC", 0., 0., z, 0, true, ubuf);
   z = covparams[3];
@@ -617,9 +630,11 @@ void Phos::CreateGeometry()
 
   // Create a PHOS module.
   // Gsvolu accepts non-const params. Avoid modification geometry
-  float params[4] = {geom->GetPHOSParams()[0], geom->GetPHOSParams()[1], geom->GetPHOSParams()[2], geom->GetPHOSParams()[3]};
+  // float params[4] = {geom->GetPHOSParams()[0], geom->GetPHOSParams()[1], geom->GetPHOSParams()[2], geom->GetPHOSParams()[3]};
+  float params[3] = {geom->GetPHOSParams()[0], geom->GetPHOSParams()[2], geom->GetPHOSParams()[3]};
   int imed = gGeoManager->GetMedium("AIR")->GetId();
-  gGeoManager->Volume("PHOS", "TRD1", imed, params, 4); // 20-> idtmed[20]
+  // gGeoManager->Volume("PHOS", "TRD1", imed, params, 4); // 20-> idtmed[20]
+  gGeoManager->Volume("PHOS", "BOX", imed, params, 3); // 20-> idtmed[20]
 
   CreateGeometryforEMC();
 
@@ -635,6 +650,6 @@ void Phos::CreateGeometry()
                               angle[2][0], angle[2][1]);
 
   float pos[3] = {0};
-  // geom->GetModuleCenter(pos);
+  geom->GetModuleCenter(pos);
   gGeoManager->Node("PHOS", 0, "World", pos[0], pos[1], pos[2], idrotm, true, static_cast<double*>(nullptr));
 }
