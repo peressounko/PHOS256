@@ -5,6 +5,8 @@
 
 // --- ROOT system ---
 #include "TObject.h"
+#include <TGeoMatrix.h>
+#include <TVector3.h>
 
 // --- PHOS256 header files ---
 
@@ -18,11 +20,35 @@ class Geometry : public TObject
   static const Geometry* Instance(float r, float theta);
 
   // local/master conversions
+  /// \breif Converts Geant volume numbers to absId
+  /// \return AbsId index of the PHOS cell
+  /// \param moduleNumber: module number
+  /// \param strip: strip number
+  //  \param cell: cell in strip number
   static int RelToAbsId(int moduleNumber, int strip, int cell);
+
   static void RelToAbsId(const int relid[2], int& absId);
+
+  // Converts the absolute numbering into the following array
+  //  relid[0] = Row number inside a PHOS module (Phi coordinate)  //To be checked!!!!
+  //  relid[1] = Column number inside a PHOS module (Z coordinate)
   static bool AbsToRelNumbering(int, int*);
   static void DetIdToLocalPosition(int detID, double& xi, double& zi);
+
+  /// \breif Checks if two channels have common side
+  /// \param absId1: absId of first channel, order important!
+  /// \param absId2: absId of secont channel, order important!
+  /// \return  0 are not neighbour but continue searching
+  //         = 1 are neighbour
+  //         = 2 are not neighbour but do not continue searching
+  //         =-1 are not neighbour, continue searching, but do not look before d2 next time
   static int AreNeighbours(int detId1, int detId2);
+
+  // convert local position in module to global position in World
+  void Local2Global(float x, float z, TVector3& globaPos);
+
+  // calculate impact position on PHOS
+  bool ImpactOnPHOS(const TVector3& p, float& z, float& x);
 
   // Return general PHOS parameters
   void GetModuleAngles(float angle[3][2]) const;
@@ -87,6 +113,7 @@ class Geometry : public TObject
  protected:
   Geometry(float r, float theta);
   void Init();
+  bool ReadMatrix(); // Read conversion matrix from TGeoManager
 
   //  void                     SetPHOSAngles();  // calculates the PHOS modules PHI angle
 
@@ -96,6 +123,8 @@ class Geometry : public TObject
   static constexpr int fNPhi = 16; // Number of crystal units in X (phi) direction
   static constexpr int fNZ = 16;   // Number of crystal units in Z direction
   static constexpr float CELLSTEP = 2.25;
+
+  TGeoHMatrix* fPHOSMatrix = nullptr;
 
   float fModR = 0.;         // Distance from IP to front surface of crystals
   float fModTheta = 0.;     // polar angle to module center

@@ -17,9 +17,18 @@
 #include <iostream> // std::cout
 #include <math.h>
 #include <cassert>
+#include <TGeoManager.h>
 
 // --- PHOS256 header files ---
 #include "Geometry.h"
+
+// module numbering:
+// absId:
+// start from 1 till 16*16=256. Numbering in each module starts at bottom left and first go in z direction:
+//  16   32     256
+//  ...  ...    ...
+//  1    17 ... 241
+//  relid[2]: (iphi[1...16], iz[1...16])
 
 Geometry* Geometry::fgGeom = nullptr;
 
@@ -129,6 +138,85 @@ int Geometry::AreNeighbours(int absId1, int absId2)
   return 0;
 }
 
+// convert local position in module to global position in World
+void Geometry::Local2Global(float x, float z, TVector3& globaPos)
+{
+  if (!fPHOSMatrix) {
+    if (!ReadMatrix()) {
+      return;
+    }
+  }
+
+  constexpr float shiftY = -1.26; // Depth-optimized
+  double posL[3] = {x, z, shiftY};
+  double posG[3];
+  fPHOSMatrix->LocalToMaster(posL, posG);
+  globaPos.SetXYZ(posG[0], posG[1], posG[2]);
+}
+
+// calculate impact position on PHOS
+bool Geometry::ImpactOnPHOS(const TVector3& p, float& z, float& x)
+{
+  // calculates the impact coordinates on PHOS of a neutral particle
+  // emitted in the vertex with 3-momentum p
+  constexpr float shiftY = -1.26;        // Depth-optimized
+  constexpr float moduleXhalfSize = 18.; // 2.25 * 8
+  constexpr float moduleZhalfSize = 18.; // 2.25 * 8
+
+  if (!fPHOSMatrix) {
+    if (!ReadMatrix()) {
+      return false;
+    }
+  }
+
+  // create vector from (0,0,0) to center of crystal surface of imod module
+  double tmp[3] = {0., 0., shiftY};
+  double glob[3];
+  fPHOSMatrix->LocalToMaster(tmp, glob);
+  TVector3 globaPos(glob);
+  double direction = globaPos.Dot(p);
+  if (direction <= 0.) {
+    return false; // momentum directed FROM module
+  }
+  double fr = globaPos.Mag2() / direction;
+  // Calculate direction in module plane
+  globaPos -= fr * p;
+  globaPos *= -1.;
+  if (TMath::Abs(globaPos.Z()) < moduleZhalfSize && globaPos.Pt() < moduleXhalfSize) {
+    z = globaPos.Z();
+    x = TMath::Sign(globaPos.Pt(), globaPos.X());
+    // no need to return to local system since we calcilated distance from module center
+    // and tilts can not be significant.
+    return true;
+  }
+
+  // Not in acceptance
+  x = 0;
+  z = 0;
+  return false;
+}
+
+bool Geometry::ReadMatrix()
+{
+  if (fPHOSMatrix) {
+    return true;
+  }
+  // If GeoManager exists, take matrixes from it
+  if (gGeoManager) {
+    char path[255];
+    snprintf(path, 255, "World_1/PHOS_0/PEMC_1/PCOL_1/PTIO_1/PCOR_1/PAGA_1/PTII_1");
+    if (!gGeoManager->CheckPath(path)) {
+      std::cout << "Geo manager can not find path " << path << std::endl;
+      return false;
+    }
+    gGeoManager->cd(path);
+    fPHOSMatrix = new TGeoHMatrix(*gGeoManager->GetCurrentMatrix());
+    return true;
+  } else {
+    std::cout << "Geometry is not initialized, create or read geometry.root" << std::endl;
+    return false;
+  }
+}
 // //____________________________________________________________________________
 // void Geometry::GetGlobalPHOS(const AliPHOSRecPoint* recPoint, TVector3 & gpos) const
 // {
