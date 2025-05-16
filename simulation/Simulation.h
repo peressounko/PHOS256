@@ -27,14 +27,18 @@
 class Simulation : public TVirtualMCApplication
 {
  public:
-  Simulation() = default;
+  Simulation();
   Simulation(const Simulation* s);
   virtual ~Simulation() = default;
+  static Simulation* Instance() { return fSimulation; }
 
   // methods
   void InitMC(std::string configName);
-  void RunMC(Int_t nofEvents);
+  void RunMC(int nofEvents);
   void FinishRun();
+
+  void SetPHOS(Phos* det) { fPHOS = det; }
+  void SetGenerator(GenBox* gen) { fGenerator = gen; }
 
   void SetRTheta(double r = 100, double theta = 20)
   {
@@ -60,6 +64,8 @@ class Simulation : public TVirtualMCApplication
   virtual void FinishEvent();
 
  private:
+  static Simulation* fSimulation; //! pointer to this instance
+
   mutable TMCRootManager* fRootManager; //!< Root manager
   bool fIsMaster = true;                ///< If is on master thread
 

@@ -38,6 +38,8 @@ class GenBox : public TObject
   }
   virtual void SetPart(int part) { fIpart = part; }
 
+  void SetStack(TVirtualMCStack* stack) { fStack = stack; }
+
  private:
   // data members
   TVirtualMCStack* fStack = nullptr; ///< VMC stack

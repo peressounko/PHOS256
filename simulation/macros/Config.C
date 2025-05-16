@@ -1,69 +1,101 @@
-//#include <TPGCode.h>
+#include "RunConfiguration.h"
 
 void Config()
 {
 
-   // libraries required by geant321
-    // gSystem->Load("libgeant321");
 
-    new     TGeant4("C++ Interface to Geant4");
+  Simulation * gSim = Simulation::Instance();
 
-    TGeant4 *geant = dynamic_cast<TGeant4*>gMC;
+  GenBox * gen = new GenBox(); //Acceptance theta, phi
+  gen->SetMomentumRange(0.5,1.);
+  gen->SetThetaRange(10.,30.);
+  gen->SetPhiRange(-10.,10.);
+  gSim->SetGenerator(gen);
 
-    // Set External decayer
-//    TVirtualMCDecayer *decayer = new AliDecayerPythia();
-    // decayer->SetForceDecay(kAll);
-    // decayer->Init();
-    // gMC->SetExternalDecayer(decayer);
 
-    //
-    //
-    //=======================================================================
-    // ******* GEANT STEERING parameters FOR ALICE SIMULATION *******
-    // geant3->SetTRIG(1);         //Number of events to be processed 
-    // geant3->SetSWIT(4, 10);
-    // geant3->SetDEBU(0, 0, 1);
-    // //geant3->SetSWIT(2,2);
-    // geant3->SetDCAY(1);
-    // geant3->SetPAIR(1);
-    // geant3->SetCOMP(1);
-    // geant3->SetPHOT(1);
-    // geant3->SetPFIS(0);
-    // geant3->SetDRAY(0);
-    // geant3->SetANNI(1);
-    // geant3->SetBREM(1);
-    // geant3->SetMUNU(1);
-    // geant3->SetCKOV(1);
-    // geant3->SetHADR(1);         //Select pure GEANH (HADR 1) or GEANH/NUCRIN (HADR 3)
-    // geant3->SetLOSS(2);
-    // geant3->SetMULS(1);
-    // geant3->SetRAYL(1);
-    // geant3->SetAUTO(1);         //Select automatic STMIN etc... calc. (AUTO 1) or manual (AUTO 0)
-    // geant3->SetABAN(0);         //Restore 3.16 behaviour for abandoned tracks
-    // geant3->SetOPTI(2);         //Select optimisation level for GEANT geometry searches (0,1,2)
-    // geant3->SetERAN(5.e-7);
+  //Construct PHOS
+  Phos * ph = new Phos(100.,20.) ; //Distance to crystal, angle
+  gSim->SetPHOS(ph);
+   
 
-    // Float_t cut = 1.e-3;        // 1MeV cut by default
-    // Float_t tofmax = 1.e10;
+ ///    Create the run configuration
+/// In constructor user has to specify the geometry input
+/// and select geometry navigation via the following options:
+/// - geomVMCtoGeant4   - geometry defined via VMC, G4 native navigation
+/// - geomVMCtoRoot     - geometry defined via VMC, Root navigation
+/// - geomRoot          - geometry defined via Root, Root navigation
+/// - geomRootToGeant4  - geometry defined via Root, G4 native navigation
+/// - geomGeant4        - geometry defined via Geant4, G4 native navigation
+///
+/// The second argument in the constructor selects physics list:
+/// - emStandard         - standard em physics (default)
+/// - emStandard+optical - standard em physics + optical physics
+/// - XYZ                - selected hadron physics list ( XYZ = LHEP, QGSP, ...)
+/// - XYZ+optical        - selected hadron physics list + optical physics
+///
+/// The third argument activates the special processes in the TG4SpecialPhysicsList,
+/// which implement VMC features:
+/// - stepLimiter       - step limiter (default) 
+/// - specialCuts       - VMC cuts
+/// - specialControls   - VMC controls for activation/inactivation selected processes
+/// - stackPopper       - stackPopper process
+/// When more than one options are selected, they should be separated with '+'
+/// character: eg. stepLimit+specialCuts.
 
-    //             GAM ELEC NHAD CHAD MUON EBREM MUHAB EDEL MUDEL MUPA TOFMAX
-    // geant3->SetCUTS(cut, cut, cut, cut, cut, cut, cut, cut, cut, cut,
-                    // tofmax);
-    
-    //Configure generator
-    GenBox *gener = new GenBox(1);
-    gener->SetPart(kGamma);
-    gener->SetMomentumRange(10,11.);
-    gener->SetPhiRange(270.5,270.7);
-    gener->SetThetaRange(90.5,90.7);
-    gener->Init();
+  //TG4RunConfiguration* runConfiguration 
+           //= new TG4RunConfiguration("geomRoot", "FTFP_BERT", "stepLimiter+specialCuts");
+  TG4RunConfiguration* runConfiguration 
+      = new TG4RunConfiguration("geomRoot", "FTFP_BERT+optical", "stepLimiter"); 
+
+/// Create the G4 VMC 
+   TGeant4* geant4 = new TGeant4("TGeant4", "The Geant4 Monte Carlo", runConfiguration);
+   cout << "Geant4 has been created." << endl;
+
+/// create Fair Specific stack
+   Stack *stack = new Stack(1000); 
+//   stack->StoreSecondaries(kTRUE);
+ //  stack->SetMinPoints(0);
+   geant4->SetStack(stack);
+
+/// create Fair Specific stack
+//   MpdStack *stack = new MpdStack(1000); 
+//   stack->StoreSecondaries(kTRUE);
+ //  stack->SetMinPoints(0);
+//   geant4->SetStack(stack);
+
+   //AZ if(FairRunSim::Instance()->IsExtDecayer()){
+   /* We don't have Pythia6 anymore
+   if(FairRunSim::Instance()->IsExtDecayer() && !geant4->GetDecayer()){ //AZ
+      TVirtualMCDecayer* decayer = TPythia6Decayer::Instance();
+      geant4->SetExternalDecayer(decayer);
+   }
+   */
+  
+/// Customise Geant4 setting
+/// (verbose level, global range cut, ..)
+
+   TString configm(gSystem->Getenv("VMCWORKDIR"));
+   TString configm1 = configm + "g4config.in";
+   cout << " -I g4Config() using g4conf  macro: " << configm1 << endl;
+
+   // set the common cuts 
+   TString cuts = configm + "SetCuts.C";
+   cout << "Physics cuts with script \n "<<  cuts.Data() << endl;
+   Int_t cut=gROOT->LoadMacro(cuts.Data());
+   if(cut==0)gInterpreter->ProcessLine("SetCuts()"); 
+
+   //set geant4 specific stuff
+  geant4->SetMaxNStep(10000);  // default is 30000
+  geant4->ProcessGeantMacro(configm1.Data());
+
+  // Activate the parameters defined in tracking media
+  // (DEEMAX, STMIN, STEMAX), which are, be default, ignored.
+  // In Geant4 case, only STEMAX is taken into account.
+//  geant4->SetUserParameters(kTRUE);
+
  
-    // Magnetic Field 
-    //TGeoGlobalMagField::Instance()->SetField(new AliMagF("Maps","Maps", 1., 1., AliMagF::k5kG));
 
-    //=================== Create detector(s) =============================
-    BODY *Hall = new Hall("Experimental hall");
 
-    Phos *ph = new Phos(0.75,20.); //Position: radius in m, polar angle, degrees
+  cout << "Finished Config" <<  endl;
 
 }

@@ -20,6 +20,27 @@
 
 using namespace std;
 
+Simulation* Simulation::fSimulation = nullptr;
+
+Simulation::Simulation() : TVirtualMCApplication(),
+                           fIsMaster(true),
+                           fRad(100.),
+                           fTheta(20.),
+                           fStack(nullptr),
+                           fGenerator(nullptr),
+                           fMagField(nullptr),
+                           fHall(nullptr),
+                           fPHOS(nullptr),
+                           fDigitizer(nullptr),
+                           fClusterizer(nullptr),
+                           fDigits(nullptr),
+                           fClusters(nullptr),
+                           fTree(nullptr),
+                           fOutFile(nullptr)
+{
+  fSimulation = this;
+}
+
 Simulation::Simulation(const Simulation* s)
 {
 }
@@ -59,7 +80,11 @@ void Simulation::InitMC(std::string configName)
   gMC->SetMagField(fMagField);
 
   // Create a primary generator
-  fGenerator = new GenBox(fStack);
+  if (!fGenerator) {
+    fGenerator = new GenBox(fStack);
+  } else {
+    fGenerator->SetStack(fStack);
+  }
 
   gMC->Init();
   gMC->BuildPhysics();
@@ -80,8 +105,10 @@ void Simulation::ConstructGeometry()
   fHall->CreateGeometry();
 
   // construct GEANT geometry
-  if (!fPHOS)
+  if (!fPHOS) {
+    std::cout << "Creating Default PHOS!!!" << std::endl;
     fPHOS = new Phos(fRad, fTheta); // Make configurable
+  }
   fPHOS->SetHitContainer(&fHits);
   fPHOS->CreateMaterials();
   fPHOS->CreateGeometry(); // creates the geometry for GEANT
@@ -207,13 +234,14 @@ void Simulation::FinishEvent()
   /// User actions after finishing an event
 
   // Print info about primary particle
-  TParticle* primary = fStack->GetParticle(0);
-  cout << endl
-       << ">>> Event " << gMC->CurrentEvent()
-       << " >>> Simulation truth : " << primary->GetPDG()->GetName() << " ("
-       << primary->Px() * 1e03 << ", " << primary->Py() * 1e03 << ", "
-       << primary->Pz() * 1e03 << ") MeV" << endl;
-
+  if (fStack->GetNtrack()) {
+    TParticle* primary = fStack->GetParticle(0);
+    cout << endl
+         << ">>> Event " << gMC->CurrentEvent()
+         << " >>> Simulation truth : " << primary->GetPDG()->GetName() << " ("
+         << primary->Px() * 1e03 << ", " << primary->Py() * 1e03 << ", "
+         << primary->Pz() * 1e03 << ") MeV" << endl;
+  }
   // Call detectors
   fPHOS->FinishEvent();
   if (fDigitizer) {

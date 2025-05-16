@@ -212,7 +212,7 @@ TParticle* Stack::GetParticle(int id) const
   /// \param id The index of the particle to be returned
 
   if (id < 0 || id >= fParticles->GetEntriesFast())
-    Fatal("GetParticle", "Index out of range");
+    Fatal("GetParticle", "Index %d out of range= %d", id, fParticles->GetEntriesFast());
 
   return (TParticle*)fParticles->At(id);
 }
