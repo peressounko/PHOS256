@@ -40,7 +40,7 @@ class GenBox : public TObject
 
   void SetStack(TVirtualMCStack* stack) { fStack = stack; }
 
- private:
+ protected:
   // data members
   TVirtualMCStack* fStack = nullptr; ///< VMC stack
   int fNofPrimaries = 0;             ///< Number of primary particles

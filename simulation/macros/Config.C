@@ -7,14 +7,15 @@ void Config()
   Simulation * gSim = Simulation::Instance();
 
   GenBox * gen = new GenBox(); //Acceptance theta, phi
+  gen->SetNofPrimaries(5);
   gen->SetMomentumRange(0.5,1.);
-  gen->SetThetaRange(10.,30.);
-  gen->SetPhiRange(-10.,10.);
+  gen->SetThetaRange(0.,10.);
+  gen->SetPhiRange(0.,360.);
   gSim->SetGenerator(gen);
 
 
   //Construct PHOS
-  Phos * ph = new Phos(100.,20.) ; //Distance to crystal, angle
+  Phos * ph = new Phos(10.,0.) ; //Distance to crystal, angle
   gSim->SetPHOS(ph);
    
 

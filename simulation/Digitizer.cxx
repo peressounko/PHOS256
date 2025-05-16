@@ -46,7 +46,6 @@ void Digitizer::ProcessEvent()
 
   // Find the first cell with signal
   int nHits = fHits->size();
-  int hitIndex = 0;
   int nextSigId = 999999; // in case no ginal in
   auto h = fHits->begin();
   if (h != fHits->end()) {
@@ -60,13 +59,11 @@ void Digitizer::ProcessEvent()
     if (cellId == nextSigId) {
       // Create new Digit
       Digit* digit = new ((*fDigits)[nDigits++]) Digit(*h);
-      hitIndex++;
       ++h;
       while (h != fHits->end()) {
-
         if (digit->CanAdd(*h)) { // Point from the same Tower
           digit->AddHit(*h);
-          hitIndex++;
+          ++h;
         } else { // Points are sorted according to cellID. If no more points left, finish
           nextSigId = h->GetCellID();
           break;

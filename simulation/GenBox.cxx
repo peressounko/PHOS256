@@ -54,10 +54,10 @@ void GenBox::Generate()
     double random[3];
     gRandom->RndmArray(3, random);
 
-    double pt = fPtMin + random[0] * (fPtMax - fPtMin);
+    double pmom = fPtMin + random[0] * (fPtMax - fPtMin);
     double theta = degToRad * (fThetaMin + random[1] * (fThetaMax - fThetaMin));
     double phi = degToRad * (fPhiMin + random[2] * (fPhiMax - fPhiMin));
-    double pmom = pt / TMath::Sin(theta);
+    double pt = pmom * TMath::Cos(theta);
     double e = TMath::Sqrt(pmom * pmom + m * m);
 
     p[0] = pt * TMath::Cos(phi);
@@ -83,7 +83,7 @@ void GenBox::Generate()
     /// \param ntr       track number (is filled by the stack)
     /// \param weight    particle weight
     /// \param is        generation status code
-    fStack->PushTrack(toBeDone, -1, fIpart, p[0], p[1], p[1], e, origin[0], origin[1], origin[0], time, polx,
+    fStack->PushTrack(toBeDone, -1, fIpart, p[0], p[1], p[2], e, origin[0], origin[1], origin[2], time, polx,
                       poly, polz, kPPrimary, ntr, 1., 0);
   }
 }
