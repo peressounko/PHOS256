@@ -209,7 +209,7 @@ void Simulation::BeginEvent()
     fClusters = new TObjArray();
     fClusterizer->SetDigits(fDigits);
     fClusterizer->SetClusters(fClusters);
-    fTree->Branch("Clusters", &fClusters, 32000, 99);
+    fTree->Branch("Clusters", "TObjArray", &fClusters, 32000, 0);
   }
 }
 
