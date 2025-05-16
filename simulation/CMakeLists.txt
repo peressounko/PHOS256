@@ -1,20 +1,37 @@
 #Create a library called "libSimulation" which includes the source files given in the array.
 Set(LibName "Simulation")
 
-set(INCLUDE_DIRECTORIES ${ROOT_INCLUDE_DIR} ${PHOS256_SOURCE_DIR}/utils ${PHOS256_SOURCE_DIR}/dataformats ${CMAKE_CURRENT_LIST_DIR})
+set(INCLUDE_DIRECTORIES ${ROOT_INCLUDE_DIR} ${PYTHIA_INCLUDE_DIR}/.. ${Geant4_INCLUDE_DIRS}  ${GEANT4VMC_INCLUDE_DIRS} ${VMC_INCLUDE_DIRS} ${PHOS256_SOURCE_DIR}/utils ${PHOS256_SOURCE_DIR}/dataformats ${CMAKE_CURRENT_LIST_DIR})
 
-Set(SYSTEM_INCLUDE_DIRECTORIES ${ROOT_INCLUDE_DIR})
+#include_directories(${ROOT_INCLUDE_DIR} ${PHOS256_SOURCE_DIR}/utils ${PHOS256_SOURCE_DIR}/dataformats ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURRENT_LIST_DIR}) 
+message("INCLUDE_DIRECTORIES=" ${INCLUDE_DIRECTORIES}) 
 
-include_directories(${INCLUDE_DIRECTORIES} ${Geant4_INCLUDE_DIRS} ${GEANT4VMC_INCLUDE_DIRS} ${VMC_INCLUDE_DIRS})
+#Set(SYSTEM_INCLUDE_DIRECTORIES ${ROOT_INCLUDE_DIR})
 
-set(LINK_DIRECTORIES ${ROOT_LIBRARY_DIR})
+# Print all defined variables
+#get_cmake_property(_variableNames VARIABLES)
+#list (SORT _variableNames)
+#foreach (_variableName ${_variableNames})
+#    message(STATUS "${_variableName}=${${_variableName}}")
+#endforeach()
+
+message("Pythia=" ${PYTHIA_INCLUDE_DIR}) 
+message("INCLUDE_DIRECTORIES=" ${INCLUDE_DIRECTORIES}) 
+
+#include_directories(${INCLUDE_DIRECTORIES} ${PYTHIA_INCLUDE_DIR} )
+#include_directories(${INCLUDE_DIRECTORIES} ${Geant4_INCLUDE_DIRS}  ${GEANT4VMC_INCLUDE_DIRS} ${VMC_INCLUDE_DIRS})
+#include_directories(${INCLUDE_DIRECTORIES} ${PYTHIA_INCLUDE_DIR} ${Geant4_INCLUDE_DIRS}  ${GEANT4VMC_INCLUDE_DIRS} ${VMC_INCLUDE_DIRS})
+
+#message("INCLUDE_DIRECTORIES=" ${INCLUDE_DIRECTORIES}) 
+
+set(LINK_DIRECTORIES ${ROOT_LIBRARY_DIR} ${PYTHIA_LIBRARY_SHARED})
 
 link_directories(${LINK_DIRECTORIES})
 
 #List of source files
-set(SRCS  Hall.cxx Phos.cxx Stack.cxx GenBox.cxx MagField.cxx Digitizer.cxx Clusterizer.cxx Simulation.cxx)
+set(SRCS  Hall.cxx Phos.cxx Stack.cxx GenBox.cxx GenPythia.cxx MagField.cxx Digitizer.cxx Clusterizer.cxx Simulation.cxx)
 
-set(HDRS Hall.h Phos.h Stack.h GenBox.h MagField.h Digitizer.h Clusterizer.h Simulation.h)
+set(HDRS Hall.h Phos.h Stack.h GenBox.h GenPythia.h MagField.h Digitizer.h Clusterizer.h Simulation.h)
 
 #Generate the dictionary
 #It will create G_ARG1.cxx and G_ARG1.h / ARG1 = function first argument

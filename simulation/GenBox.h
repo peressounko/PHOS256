@@ -6,21 +6,19 @@
 class TVirtualMCStack;
 class TVector3;
 
-class A01DetectorConstruction;
-
 class GenBox : public TObject
 {
  public:
   GenBox(TVirtualMCStack* stack);
   GenBox(const GenBox& origin, TVirtualMCStack* stack);
   GenBox() = default;
-  ~GenBox() = default;
+  virtual ~GenBox() = default;
 
   // methods
-  void Generate();
+  virtual void Generate();
 
   // set methods
-  void SetNofPrimaries(int nofPrimaries) { fNofPrimaries = nofPrimaries; }
+  virtual void SetNofPrimaries(int nofPrimaries) { fNofPrimaries = nofPrimaries; }
   void SetMomentumRange(double ptMin, double ptMax)
   {
     fPtMin = ptMin;

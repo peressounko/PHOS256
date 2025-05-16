@@ -41,7 +41,7 @@ Geometry::Geometry(float r, float theta) : fIPtoCrystalSurface(r), fModTheta(the
 }
 
 //____________________________________________________________________________
-const Geometry* Geometry::Instance(float r, float theta)
+Geometry* Geometry::Instance(float r, float theta)
 {
   // Returns the pointer of the unique instance
   if (fgGeom && (fgGeom->fModR != r || fgGeom->fModTheta != theta)) {

@@ -30,6 +30,7 @@ set(CMAKE_MODULE_PATH "${PHOS256_SOURCE_DIR}/cmake")
 
 include(CheckCXXCompilerFlag)
 
+#find_package(PYTHIA REQUIRED)
 find_package(GEANT4 REQUIRED)
 find_package(GEANT4VMC REQUIRED)
 

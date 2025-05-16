@@ -28,53 +28,56 @@
 
 #endif
 
-namespace g4libUtilities {
-  Bool_t isLibrary(const char* libName)
-  {
+namespace g4libUtilities
+{
+Bool_t isLibrary(const char* libName)
+{
   /// Helper function which testes the existence of the given library
   /// \param libName  The library name
 
-    if (TString(gSystem->DynamicPathName(libName, kTRUE)) != TString(""))
-      return kTRUE;
-    else
-      return kFALSE;
-  }
+  if (TString(gSystem->DynamicPathName(libName, kTRUE)) != TString(""))
+    return kTRUE;
+  else
+    return kFALSE;
 }
+} // namespace g4libUtilities
 
 void loadg4libs()
 {
-/// Macro function for loading Geant4 libraries
-/// from list of libraries build by geant4-config --libs
+  /// Macro function for loading Geant4 libraries
+  /// from list of libraries build by geant4-config --libs
+
+  gSystem->Load("pythia8");
 
   FILE* pipe = gSystem->OpenPipe("geant4-config --libs", "r");
   std::string all_lines;
   char line[1000];
-  while ( fgets(line, sizeof(line), pipe ) != NULL ) {
+  while (fgets(line, sizeof(line), pipe) != NULL) {
     all_lines += line;
   }
 
   TString all_lines_t(all_lines.data());
   all_lines_t.Remove(all_lines_t.First('\n'));
-  //cout << all_lines_t.Data() << endl;
+  // cout << all_lines_t.Data() << endl;
   TObjArray* libs = all_lines_t.Tokenize(" ");
 
-  //TString dynamicPath = gSystem->GetDynamicPath();
-  for (Int_t i=libs->GetEntriesFast()-1; i>=0; i-- ) {
+  // TString dynamicPath = gSystem->GetDynamicPath();
+  for (Int_t i = libs->GetEntriesFast() - 1; i >= 0; i--) {
     TString addPath = ((TObjString*)libs->At(i))->GetString();
     if (addPath.BeginsWith("-L")) {
-      addPath.Remove(0,2);
+      addPath.Remove(0, 2);
       addPath.ReplaceAll("\"", "");
-      //cout << "Adding dynamic path " << addPath.Data() << endl;
+      // cout << "Adding dynamic path " << addPath.Data() << endl;
       gSystem->AddDynamicPath(addPath.Data());
     }
   }
 
   cout << libs->GetEntriesFast() << endl;
-  for (Int_t i=libs->GetEntriesFast()-1; i>=0; i-- ) {
+  for (Int_t i = libs->GetEntriesFast() - 1; i >= 0; i--) {
     TString lib = ((TObjString*)libs->At(i))->GetString();
     lib.ReplaceAll("-l", "lib");
-    //cout << "Loading |" << lib.Data() << "|" << endl;
-    if(lib.BeginsWith("lib"))
+    // cout << "Loading |" << lib.Data() << "|" << endl;
+    if (lib.BeginsWith("lib"))
       gSystem->Load(lib.Data());
   }
 
@@ -83,31 +86,33 @@ void loadg4libs()
 
 Bool_t isBatch()
 {
-/// Helper function which testes if Root was started in batch mode
+  /// Helper function which testes if Root was started in batch mode
 
-  for ( Int_t i=0; i<gApplication->Argc(); ++i )
-    if ( TString(gROOT->GetApplication()->Argv(i)) == "-b" ) return true;
+  for (Int_t i = 0; i < gApplication->Argc(); ++i)
+    if (TString(gROOT->GetApplication()->Argv(i)) == "-b")
+      return true;
 
   return false;
 }
 
 Bool_t isSet(const char* variable)
 {
-/// Helper function which checks if the specified environment variable
-/// is set.
-/// \param variable  The environment variable name
+  /// Helper function which checks if the specified environment variable
+  /// is set.
+  /// \param variable  The environment variable name
 
   TString value = gSystem->Getenv(variable);
-  if ( value != "") return true;
+  if (value != "")
+    return true;
 
   return false;
 }
 
 Bool_t isMT()
 {
-/// Macro function for detecting if Geant4 libraries
-/// are built in multi-threading mode via
-/// geant4-config --has-feature multithreading
+  /// Macro function for detecting if Geant4 libraries
+  /// are built in multi-threading mode via
+  /// geant4-config --has-feature multithreading
 
   FILE* pipe = gSystem->OpenPipe("geant4-config  --has-feature multithreading", "r");
   char line[10];
@@ -115,14 +120,14 @@ Bool_t isMT()
   TString answer = line;
   answer.Remove(answer.First('\n'));
 
-  return ( answer == "yes");
+  return (answer == "yes");
 }
 
 void vgmlibs()
 {
-/// Function for loading VGM libraries.
+  /// Function for loading VGM libraries.
 
-  if ( isSet("USE_VGM") ) {
+  if (isSet("USE_VGM")) {
     cout << "Loading VGM libraries ... " << endl;
     gSystem->Load("libClhepVGM");
     gSystem->Load("libBaseVGM");
@@ -142,7 +147,7 @@ void g4libs()
   vgmlibs();
 
   // VMC library (optional)
-  if ( g4libUtilities::isLibrary("libVMCLibrary") ) {
+  if (g4libUtilities::isLibrary("libVMCLibrary")) {
     cout << "Loading VMC library ..." << endl;
     gSystem->Load("libVMCLibrary");
   }
@@ -156,7 +161,7 @@ void g4libs()
   gSystem->Load("libgeant4vmc");
 
   // initialize Root threading
-  if ( isMT() ) {
+  if (isMT()) {
     TThread::Initialize();
   }
 }

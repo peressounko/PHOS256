@@ -16,8 +16,8 @@ class Geometry : public TObject
  public:
   // private constructor for singleton
   ~Geometry() = default;
-  static const Geometry* Instance() { return fgGeom; }
-  static const Geometry* Instance(float r, float theta);
+  static Geometry* Instance() { return fgGeom; }
+  static Geometry* Instance(float r, float theta);
 
   // local/master conversions
   /// \breif Converts Geant volume numbers to absId

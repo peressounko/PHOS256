@@ -78,7 +78,8 @@ void Stack::PushTrack(int toBeDone, int parent, int pdg,
 
   // Info("PushTrack","toBeDone=%d, parent=%d, pdg=%d, fNPrimary=%d",toBeDone,parent,pdg, fNPrimary);
 
-  if (parent < 0)
+  // if (parent < 0)
+  if (toBeDone)
     fNPrimary++;
 
   if (toBeDone)
