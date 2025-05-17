@@ -217,3 +217,61 @@ TParticle* Stack::GetParticle(int id) const
 
   return (TParticle*)fParticles->At(id);
 }
+//_____________________________________________________________________________
+void Stack::StoreTrack(int track) // mark trask to be stored
+{
+  // Mark track to be stored (set FirstDaughter field to 0 instead of def. -1)
+  // track all all his ancestors
+  if (track < 0 || track >= fParticles->GetEntriesFast()) {
+    return;
+  }
+  TParticle* p = static_cast<TParticle*>(fParticles->At(track));
+  if (p->GetFirstDaughter() == 0) { // already marked
+    return;
+  }
+  p->SetFirstDaughter(0);
+  track = p->GetMother(0);
+  while (track >= 0) {
+    p = static_cast<TParticle*>(fParticles->At(track));
+    if (p->GetFirstDaughter() == 0) { // already marked
+      return;
+    }
+    p->SetFirstDaughter(0);
+    track = p->GetMother(0);
+  }
+  return;
+}
+//_____________________________________________________________________________
+void Stack::Purge()
+{
+  // Remove all tracks not marked to be stored
+  if (fParticles->GetEntriesFast() == 0) { // nothing to do
+    return;
+  }
+  int labels[fParticles->GetEntriesFast()]; // new position of stored particles
+  int iToKeep = 0;
+  TParticle* pNew = nullptr;
+  for (int i = 0; i < fParticles->GetEntriesFast(); i++) {
+    TParticle* p = static_cast<TParticle*>(fParticles->At(i));
+    if (p->GetFirstDaughter() == 0) { // keep
+      labels[i] = iToKeep;            // new position
+      if (i == iToKeep) {             // no need to copy
+        if (p->GetMother(0) >= 0) {
+          p->SetMother(0, labels[p->GetMother(0)]);
+        }
+      } else { // copy to new position
+        pNew = static_cast<TParticle*>(fParticles->At(iToKeep));
+        pNew = p;
+        if (p->GetMother(0) >= 0) {
+          pNew->SetMother(0, labels[p->GetMother(0)]);
+        }
+      }
+      ++iToKeep;
+    } else { // do not store
+      labels[i] = -1;
+    }
+  }
+  // remove tail
+  fParticles->RemoveRange(iToKeep, fParticles->GetEntriesFast() - 1);
+  fParticles->Compress() ;
+}

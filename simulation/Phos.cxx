@@ -30,42 +30,6 @@ Phos::Phos(float r, float theta) : fCurrentTrackID(-1),
 }
 
 //____________________________________________________________________________
-// void Phos::AddHit(int shunt, int primary, int Id, float * hits)
-// {
-// Add a hit to the hit list.
-// A PHOS hit is the sum of all hits in a single crystal from one primary and within some time gate
-
-// int hitCounter ;
-// AliPHOSHit *newHit ;
-// AliPHOSHit *curHit ;
-// bool deja = kFALSE ;
-// const Geometry * geom = Geometry::Instance() ;
-
-// newHit = new AliPHOSHit(shunt, primary, Id, hits) ;
-
-// for ( hitCounter = fNhits-1 ; hitCounter >= 0 && !deja ; hitCounter-- ) {
-//   curHit = static_cast<AliPHOSHit*>((*fHits)[hitCounter]) ;
-//   if(curHit->GetPrimary() != primary) break ;
-//          // We add hits with the same primary, while GEANT treats primaries succesively
-//   if( *curHit == *newHit ) {
-//     *curHit + *newHit ;
-//     deja = kTRUE ;
-//   }
-// }
-
-// if ( !deja ) {
-//   new((*fHits)[fNhits]) AliPHOSHit(*newHit) ;
-//   // get the block Id number
-//   int relid[4] ;
-//   geom->AbsToRelNumbering(Id, relid) ;
-
-//   fNhits++ ;
-// }
-
-// delete newHit;
-// }
-
-//____________________________________________________________________________
 void Phos::FinishPrimary()
 {
   // called at the end of each track (primary) by AliRun
@@ -162,8 +126,8 @@ bool Phos::ProcessHits()
     superParent = fCurentSuperParent;
   }
 
-  if (isNewPartile) { // mark track to be kept by stack
-    // stack->addHit(1); //TODO!!!! Mark track to be stored
+  if (isNewPartile) {          // mark track to be kept by stack
+    stack->StoreTrack(partID); // Mark track to be stored
   }
 
   double lostenergy = TVirtualMC::GetMC()->Edep();

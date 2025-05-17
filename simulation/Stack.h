@@ -25,6 +25,8 @@ class Stack : public TVirtualMCStack
 
   // set methods
   virtual void SetCurrentTrack(int track);
+  void StoreTrack(int track); // mark trask to be stored
+  void Purge();               // Remove all tracks not marked to be stored
 
   // get methods
   virtual int GetNtrack() const;

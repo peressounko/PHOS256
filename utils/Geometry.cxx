@@ -90,8 +90,8 @@ bool Geometry::AbsToRelNumbering(int absId, int relid[2])
   // Converts the absolute numbering into the following array
   //  relid[0] = Row number inside a PHOS module (Z coordinate)
   //  relid[1] = Column number inside a PHOS module (x coordinate)
-  const int nZ = 8;   // nStripZ * nCellsZInStrip
-  const int nPhi = 8; // nStripZ * nCellsZInStrip
+  const int nZ = 16;   // nStripZ * nCellsZInStrip
+  const int nPhi = 16; // nStripZ * nCellsZInStrip
   absId--;
   relid[0] = 1 + absId / nZ;
   relid[1] = absId - (relid[0] - 1) * nZ + 1;
@@ -103,8 +103,8 @@ void Geometry::DetIdToLocalPosition(int absId, double& x, double& z)
   int relid[2];
   AbsToRelNumbering(absId, relid);
 
-  x = (relid[1] - 8 - 0.5) * CELLSTEP;
-  z = (relid[2] - 8 - 0.5) * CELLSTEP;
+  x = (relid[0] - 8 - 0.5) * CELLSTEP;
+  z = (relid[1] - 8 - 0.5) * CELLSTEP;
 }
 
 int Geometry::AreNeighbours(int absId1, int absId2)
@@ -179,14 +179,13 @@ bool Geometry::ImpactOnPHOS(const TVector3& p, float& z, float& x)
     return false; // momentum directed FROM module
   }
   double fr = globaPos.Mag2() / direction;
-  // Calculate direction in module plane
-  globaPos -= fr * p;
-  globaPos *= -1.;
-  if (TMath::Abs(globaPos.Z()) < moduleZhalfSize && globaPos.Pt() < moduleXhalfSize) {
-    z = globaPos.Z();
-    x = TMath::Sign(globaPos.Pt(), globaPos.X());
-    // no need to return to local system since we calcilated distance from module center
-    // and tilts can not be significant.
+  glob[0] = p[0] * fr;
+  glob[1] = p[1] * fr;
+  glob[2] = p[2] * fr;
+  fPHOSMatrix->MasterToLocal(glob, tmp);
+  z = -tmp[2];
+  x = tmp[0];
+  if (std::abs(z) < moduleZhalfSize && std::abs(x) < moduleXhalfSize) {
     return true;
   }
 

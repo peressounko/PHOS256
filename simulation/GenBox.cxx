@@ -57,12 +57,12 @@ void GenBox::Generate()
     double pmom = fPtMin + random[0] * (fPtMax - fPtMin);
     double theta = degToRad * (fThetaMin + random[1] * (fThetaMax - fThetaMin));
     double phi = degToRad * (fPhiMin + random[2] * (fPhiMax - fPhiMin));
-    double pt = pmom * TMath::Cos(theta);
-    double e = TMath::Sqrt(pmom * pmom + m * m);
+    double pt = pmom * std::sin(theta);
+    double e = std::sqrt(pmom * pmom + m * m);
 
-    p[0] = pt * TMath::Cos(phi);
-    p[1] = pt * TMath::Sin(phi);
-    p[2] = pmom * TMath::Cos(theta);
+    p[0] = pt * std::cos(phi);
+    p[1] = pt * std::sin(phi);
+    p[2] = pmom * std::cos(theta);
 
     // Add particle to stack
     /// \param toBeDone  1 if particles should go to tracking, 0 otherwise

@@ -242,6 +242,9 @@ void Simulation::FinishEvent()
          << primary->Px() * 1e03 << ", " << primary->Py() * 1e03 << ", "
          << primary->Pz() * 1e03 << ") MeV" << endl;
   }
+  fStack->Purge(); 
+
+
   // Call detectors
   fPHOS->FinishEvent();
   if (fDigitizer) {
