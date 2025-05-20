@@ -60,6 +60,8 @@ class Cluster : public TObject
       labelEdep = 0;
     }
   }
+  void UpdateLabel(int i, int newLabel) { fPrimId[i] = newLabel; }
+
   float GetE() const { return fE; };
 
   float GetEcore() const { return fEcore; };

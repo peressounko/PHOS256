@@ -234,16 +234,14 @@ void Simulation::FinishEvent()
   /// User actions after finishing an event
 
   // Print info about primary particle
-  if (fStack->GetNtrack()) {
-    TParticle* primary = fStack->GetParticle(0);
-    cout << endl
-         << ">>> Event " << gMC->CurrentEvent()
-         << " >>> Simulation truth : " << primary->GetPDG()->GetName() << " ("
-         << primary->Px() * 1e03 << ", " << primary->Py() * 1e03 << ", "
-         << primary->Pz() * 1e03 << ") MeV" << endl;
-  }
-  fStack->Purge(); 
-
+  //  if (fStack->GetNtrack()) {
+  //    TParticle* primary = fStack->GetParticle(0);
+  //    cout << endl
+  //         << ">>> Event " << gMC->CurrentEvent()
+  //         << " >>> Simulation truth : " << primary->GetPDG()->GetName() << " ("
+  //         << primary->Px() * 1e03 << ", " << primary->Py() * 1e03 << ", "
+  //         << primary->Pz() * 1e03 << ") MeV" << endl;
+  //  }
 
   // Call detectors
   fPHOS->FinishEvent();
@@ -252,6 +250,27 @@ void Simulation::FinishEvent()
   }
   if (fClusterizer) {
     fClusterizer->ProcessEvent();
+  }
+
+  fStack->Purge();
+  int label;
+  float edep;
+  for (int i = 0; i < fDigits->GetEntriesFast(); i++) {
+    Digit* d = static_cast<Digit*>(fDigits->At(i));
+    for (int j = 0; j < d->GetNPrimaries(); j++) {
+      d->GetPrimary(j, label, edep);
+      int newLabel = fStack->GetNewLabel(label);
+      d->UpdateLabel(j, newLabel);
+    }
+  }
+  // same for clusters
+  for (int i = 0; i < fClusters->GetEntriesFast(); i++) {
+    Cluster* c = static_cast<Cluster*>(fClusters->At(i));
+    for (int j = 0; j < c->GetNumberOfLabels(); j++) {
+      c->GetLabel(j, label, edep);
+      int newLabel = fStack->GetNewLabel(label);
+      c->UpdateLabel(j, newLabel);
+    }
   }
 
   // fRootManager->Fill();

@@ -54,6 +54,7 @@ class Digit : public TObject
       return true;
     }
   }
+  void UpdateLabel(int i, int newLabel) { fPrimary[i] = newLabel; }
 
  protected:
   static constexpr int kMaxLabels = 3; // number of primaries to store

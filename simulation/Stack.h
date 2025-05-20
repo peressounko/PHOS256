@@ -27,6 +27,13 @@ class Stack : public TVirtualMCStack
   virtual void SetCurrentTrack(int track);
   void StoreTrack(int track); // mark trask to be stored
   void Purge();               // Remove all tracks not marked to be stored
+  int GetNewLabel(int oldLab)
+  {
+    if (oldLab < 0 || oldLab >= fLabels.size()) {
+      return -1;
+    } else
+      return fLabels[oldLab];
+  }
 
   // get methods
   virtual int GetNtrack() const;
@@ -43,6 +50,7 @@ class Stack : public TVirtualMCStack
   TClonesArray* fParticles = nullptr; ///< The array of particle (persistent)
   int fCurrentTrack = -1;             ///< The current track number
   int fNPrimary = 0;                  ///< The number of primaries
+  std::vector<int> fLabels;           ///< remapping of labels
 
   ClassDef(Stack, 1) // Stack
 };
