@@ -320,8 +320,6 @@ void Clusterizer::EvalClusters()
 
   for (int i = 0; i < n; i++) {
     Cluster* clu = static_cast<Cluster*>(fClustersArray->UncheckedAt(i));
-    // Remove remaining digits below threshold, e.g. after unfolding
-    clu->Purify();
     // Eval all variables: Energy, CoreEnergy, position, Dispersion,...
     clu->EvalAll();
   }

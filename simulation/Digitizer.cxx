@@ -79,6 +79,9 @@ void Digitizer::ProcessEvent()
       if (fSimParams->fSimulateNoise) {
         // Simulate electronic noise
         energy += SimulateNoiseEnergy();
+        if (energy < 0) {
+          energy = 0.;
+        }
       }
 
       if (fSimParams->fApplyNonLinearity) {

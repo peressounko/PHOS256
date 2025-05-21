@@ -23,7 +23,7 @@ bool compE(const std::pair<int, float>& a, const std::pair<int, float>& b)
 
 // -----   Standard constructor   ------------------------------------------
 Cluster::Cluster(const Digit* digit)
-  : fNDigits(0), fDitisId(nullptr), fDigitsE(nullptr), fNPrimaries(0), fPrimId(nullptr), fPrimE(nullptr), fE(0), fEcore(0), fTime(0), fLocX(0),fLocZ(0), fX(0), fY(0), fZ(0), fDisp(0), fChi2(0), fLambda1(0), fLambda2(0), fNExLM(0)
+  : fNDigits(0), fDitisId(nullptr), fDigitsE(nullptr), fNPrimaries(0), fPrimId(nullptr), fPrimE(nullptr), fE(0), fEcore(0), fTime(0), fLocX(0), fLocZ(0), fX(0), fY(0), fZ(0), fDisp(0), fChi2(0), fLambda1(0), fLambda2(0), fNExLM(0)
 {
   AddDigit(digit);
 }
@@ -202,10 +202,10 @@ void Cluster::EvalAll()
   }
 
   // Correct full energy
-  fE = simParams->fCluNonLineaityA*fE + simParams->fCluNonLineaityB * exp(-fE / simParams->fCluNonLineaityC);
+  fE = simParams->fCluNonLineaityA * fE + simParams->fCluNonLineaityB * exp(-fE / simParams->fCluNonLineaityC);
 
-  //Fill Global coordinates
-  // convert local position in module to global position in World
+  // Fill Global coordinates
+  //  convert local position in module to global position in World
   TVector3 globalPos;
   geom->Local2Global(fLocX, fLocZ, globalPos);
 

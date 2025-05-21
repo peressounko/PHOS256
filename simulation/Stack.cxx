@@ -76,7 +76,8 @@ void Stack::PushTrack(int toBeDone, int parent, int pdg,
   particle->SetWeight(weight);
   particle->SetUniqueID(mech);
 
-  // Info("PushTrack","toBeDone=%d, parent=%d, pdg=%d, fNPrimary=%d",toBeDone,parent,pdg, fNPrimary);
+  // printf("toBeDone=%d, parent=%d, pdg=%d, fNPrimary=%d",toBeDone,parent,pdg, fNPrimary);
+  // particle->Print() ;
 
   // if (parent < 0)
   if (toBeDone)
@@ -248,30 +249,33 @@ void Stack::Purge()
   if (fParticles->GetEntriesFast() == 0) { // nothing to do
     return;
   }
-  int labels[fParticles->GetEntriesFast()]; // new position of stored particles
+  fLabels.clear();
+  fLabels.reserve(fParticles->GetEntriesFast());
   int iToKeep = 0;
   TParticle* pNew = nullptr;
+  // printf("PURGE: particls=%d \n",fParticles->GetEntriesFast()) ;
   for (int i = 0; i < fParticles->GetEntriesFast(); i++) {
     TParticle* p = static_cast<TParticle*>(fParticles->At(i));
+    // printf("i=%d, E=%f, toKeep=%d \n",i,p->Energy(),p->GetFirstDaughter()) ;
     if (p->GetFirstDaughter() == 0) { // keep
-      labels[i] = iToKeep;            // new position
+      fLabels.push_back(iToKeep);     // new position
       if (i == iToKeep) {             // no need to copy
         if (p->GetMother(0) >= 0) {
-          p->SetMother(0, labels[p->GetMother(0)]);
+          p->SetMother(0, fLabels[p->GetMother(0)]);
         }
       } else { // copy to new position
         pNew = static_cast<TParticle*>(fParticles->At(iToKeep));
         pNew = p;
         if (p->GetMother(0) >= 0) {
-          pNew->SetMother(0, labels[p->GetMother(0)]);
+          pNew->SetMother(0, fLabels[p->GetMother(0)]);
         }
       }
       ++iToKeep;
     } else { // do not store
-      labels[i] = -1;
+      fLabels.push_back(-1);
     }
   }
   // remove tail
   fParticles->RemoveRange(iToKeep, fParticles->GetEntriesFast() - 1);
-  fParticles->Compress() ;
+  fParticles->Compress();
 }

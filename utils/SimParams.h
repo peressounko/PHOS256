@@ -73,8 +73,8 @@ class SimParams : public TObject
   float fCoreR = 3.5;                  ///< Radius to caluclate core energy
   float fChi2radiusCut = 4.;           ///< Radius to calculate chi2
   float fSortingDelta = 1.;            ///< used in sorting clusters
-  float fCluNonLineaityA = 0.;         ///< Amp of cluster non-linearity
-  float fCluNonLineaityB = 0.109;      ///< Energy scale of cluster non-linearity
+  float fCluNonLineaityA = 1.;         ///< Amp of cluster non-linearity
+  float fCluNonLineaityB = 0.;         ///< Energy scale of cluster non-linearity
   float fCluNonLineaityC = 1.;         ///< Overall calibration
   int fNPrimMax = 5;                   ///< maximal number of primary particles per cluster
   int fNLMMax = 30;                    ///< maximal numner of local maxima

@@ -70,8 +70,8 @@ class Cluster : public TObject
 
   float GetTime() const { return fTime; };
 
-  float GetLocX() const { return fLocX;}
-  float GetLocZ() const { return fLocZ;}
+  float GetLocX() const { return fLocX; }
+  float GetLocZ() const { return fLocZ; }
 
   float GetX() const { return fX; };
 
