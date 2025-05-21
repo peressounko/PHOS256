@@ -70,6 +70,9 @@ class Cluster : public TObject
 
   float GetTime() const { return fTime; };
 
+  float GetLocX() const { return fLocX;}
+  float GetLocZ() const { return fLocZ;}
+
   float GetX() const { return fX; };
 
   float GetY() const { return fY; };
@@ -120,6 +123,10 @@ class Cluster : public TObject
   float fEcore = 0; // cluster energy core
 
   float fTime = 0; // cluster time
+
+  // cluster coordinatex in local system
+  float fLocX;
+  float fLocZ;
 
   // cluster coordinates in global system
   float fX = 0; // x-coordinate of cluster

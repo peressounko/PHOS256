@@ -23,7 +23,7 @@ bool compE(const std::pair<int, float>& a, const std::pair<int, float>& b)
 
 // -----   Standard constructor   ------------------------------------------
 Cluster::Cluster(const Digit* digit)
-  : fNDigits(0), fDitisId(nullptr), fDigitsE(nullptr), fNPrimaries(0), fPrimId(nullptr), fPrimE(nullptr), fE(0), fEcore(0), fTime(0), fX(0), fY(0), fZ(0), fDisp(0), fChi2(0), fLambda1(0), fLambda2(0), fNExLM(0)
+  : fNDigits(0), fDitisId(nullptr), fDigitsE(nullptr), fNPrimaries(0), fPrimId(nullptr), fPrimE(nullptr), fE(0), fEcore(0), fTime(0), fLocX(0),fLocZ(0), fX(0), fY(0), fZ(0), fDisp(0), fChi2(0), fLambda1(0), fLambda2(0), fNExLM(0)
 {
   AddDigit(digit);
 }
@@ -96,7 +96,6 @@ void Cluster::EvalAll()
   // Cluster coordinates
   // the shower dispersion, moments and Chi2
   // Fills final arrays with accociated digits and energy deposition
-
   // Remove cells below threshold and possibly single ceparated cells
   Purify();
 
@@ -117,7 +116,7 @@ void Cluster::EvalAll()
   fLambda1 = 0;
   fLambda2 = 0;
 
-  const Geometry* geom = Geometry::Instance();
+  Geometry* geom = Geometry::Instance();
   const SimParams* simParams = SimParams::Instance();
   double logWeight = simParams->fLogWeight;
 
@@ -164,8 +163,8 @@ void Cluster::EvalAll()
   } else {
     fLambda2 = fLambda1 = 0.;
   }
-  fX = x;
-  fZ = z;
+  fLocX = x;
+  fLocZ = z;
 
   // calculates agreement of the cluster shape with parameterization in MpdEmcClusterizer::ShowerShape
   // and core energies
@@ -180,8 +179,8 @@ void Cluster::EvalAll()
 
     double xi, zi;
     geom->DetIdToLocalPosition(detID, xi, zi);
-    double dz = zi - fZ;
-    double dx = xi - fX;
+    double dz = zi - fLocZ;
+    double dx = xi - fLocX;
     double ss = ShowerShape(dx, dz);
 
     if (sqrt(dz * dz + dx * dx) < simParams->fCoreR) {
@@ -203,7 +202,16 @@ void Cluster::EvalAll()
   }
 
   // Correct full energy
-  fE = simParams->fCluNonLineaityA + simParams->fCluNonLineaityB * exp(-fE / simParams->fCluNonLineaityC);
+  fE = simParams->fCluNonLineaityA*fE + simParams->fCluNonLineaityB * exp(-fE / simParams->fCluNonLineaityC);
+
+  //Fill Global coordinates
+  // convert local position in module to global position in World
+  TVector3 globalPos;
+  geom->Local2Global(fLocX, fLocZ, globalPos);
+
+  fX = globalPos.X();
+  fY = globalPos.Y();
+  fZ = globalPos.Z();
 
   // Prepare for writing
   FillArrays();
