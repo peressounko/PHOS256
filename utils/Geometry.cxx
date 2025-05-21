@@ -147,8 +147,8 @@ void Geometry::Local2Global(float x, float z, TVector3& globaPos)
     }
   }
 
-  constexpr float shiftY = -1.26; // Depth-optimized
-  double posL[3] = {x, z, shiftY};
+  // constexpr float shiftY = -1.26; // Depth-optimized
+  double posL[3] = {x, 0, z};
   double posG[3];
   fPHOSMatrix->LocalToMaster(posL, posG);
   globaPos.SetXYZ(posG[0], posG[1], posG[2]);

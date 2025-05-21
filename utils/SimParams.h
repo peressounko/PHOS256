@@ -29,13 +29,13 @@ class SimParams : public TObject
   bool fApplyNonLinearity = false;   ///< Apply energy non-linearity in digitization
   bool fSimulateNoise = true;        ///< Simulate noise in digitization
   bool fApplyDigitization = false;   ///< Apply energy digitization in digitization
-  float fAPDNoise = 0.005;           ///< RMS of APD noise
+  float fAPDNoise = 0.001;           ///< RMS of APD noise
   float fDigitThreshold = 2.;        ///< minimal energy to keep digit in ADC counts
   float fADCwidth = 0.005;           ///< width of ADC channel in GeV
   float fTOFa = 0.5e-9;              ///< constant term of TOF resolution
   float fTOFb = 1.e-9;               ///< stohastic term of TOF resolution
-  float fCellNonLineaityA = 0.;      ///< Amp of cel non-linearity
-  float fCellNonLineaityB = 0.109;   ///< Energy scale of cel non-linearity
+  float fCellNonLineaityA = 1.091;      ///< Amp of cel non-linearity
+  float fCellNonLineaityB = 0.;   ///< Energy scale of cel non-linearity
   float fCellNonLineaityC = 1.;      ///< Overall calibration
 
   short fZSthreshold = 1;         ///< Zero Suppression threshold
@@ -61,9 +61,9 @@ class SimParams : public TObject
 
   // Parameters used in clusterization
   float fLogWeight = 4.5;              ///< Cutoff used in log. weight calculation
-  float fDigitMinEnergy = 0.020;       ///< Minimal energy of digits to be used in cluster (GeV)
+  float fDigitMinEnergy = 0.010;       ///< Minimal energy of digits to be used in cluster (GeV)
   float fClusteringThreshold = 0.050;  ///< Minimal energy of digit to start clustering (GeV)
-  float fLocalMaximumCut = 0.015;      ///< Minimal height of local maximum over neighbours
+  float fLocalMaximumCut = 0.05;      ///< Minimal height of local maximum over neighbours
   int fUnfoldMaxSize = 100;            ///< maximal number of cells in cluster to be unfolded
   bool fUnfoldClusters = true;         ///< To perform cluster unfolding
   float fUnfogingEAccuracy = 1.e-2;    ///< Accuracy of energy calculation in unfoding prosedure (GeV)
@@ -73,7 +73,7 @@ class SimParams : public TObject
   float fCoreR = 3.5;                  ///< Radius to caluclate core energy
   float fChi2radiusCut = 4.;           ///< Radius to calculate chi2
   float fSortingDelta = 1.;            ///< used in sorting clusters
-  float fCluNonLineaityA = 1.;         ///< Amp of cluster non-linearity
+  float fCluNonLineaityA = 1.3;         ///< Amp of cluster non-linearity
   float fCluNonLineaityB = 0.;         ///< Energy scale of cluster non-linearity
   float fCluNonLineaityC = 1.;         ///< Overall calibration
   int fNPrimMax = 5;                   ///< maximal number of primary particles per cluster
