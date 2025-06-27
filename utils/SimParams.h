@@ -17,7 +17,8 @@ class SimParams : public TObject
 
  public:
   // Parameters used in conversion of deposited energy to APD response
-  float fLightYieldPerGeV = 526.; ///< Average number of photoelectrons per GeV: 1.983 gamma/MeV * 0.2655 PDE eff of APD
+  // float fLightYieldPerGeV = 526.; ///< Average number of photoelectrons per GeV: 1.983 gamma/MeV * 0.2655 PDE eff of APD
+  float fLightYieldPerGeV = 1530.; ///< Average number of photoelectrons per GeV: 6 gamma/MeV * 0.2655 PDE eff of APD
 
   // Parameters used in electronic noise calculation and thresholds (Digitizer)
   float fReadoutTime = 5.;           ///< Read-out time in ns for default simulaionts
