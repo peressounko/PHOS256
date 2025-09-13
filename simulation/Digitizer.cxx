@@ -71,10 +71,6 @@ void Digitizer::ProcessEvent()
       }
       // Add Electroinc noise, apply non-linearity, digitize, de-calibrate, time resolution
       double energy = digit->GetE();
-      // Emulate Poissonian light collection
-      if (fSimParams->fSmearLightCollection) {
-        energy = SimulateLightCollection(energy);
-      }
 
       if (fSimParams->fSimulateNoise) {
         // Simulate electronic noise

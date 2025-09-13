@@ -29,9 +29,9 @@ set(LINK_DIRECTORIES ${ROOT_LIBRARY_DIR} ${PYTHIA_LIBRARY_SHARED})
 link_directories(${LINK_DIRECTORIES})
 
 #List of source files
-set(SRCS  Hall.cxx Phos.cxx Stack.cxx GenBox.cxx GenPythia.cxx MagField.cxx Digitizer.cxx Clusterizer.cxx Simulation.cxx)
+set(SRCS  Hall.cxx Magnet.cxx Phos.cxx Stack.cxx GenBox.cxx GenPythia.cxx MagField.cxx Digitizer.cxx Clusterizer.cxx Simulation.cxx)
 
-set(HDRS Hall.h Phos.h Stack.h GenBox.h GenPythia.h MagField.h Digitizer.h Clusterizer.h Simulation.h)
+set(HDRS Hall.h Magnet.h Phos.h Stack.h GenBox.h GenPythia.h MagField.h Digitizer.h Clusterizer.h Simulation.h)
 
 #Generate the dictionary
 #It will create G_ARG1.cxx and G_ARG1.h / ARG1 = function first argument

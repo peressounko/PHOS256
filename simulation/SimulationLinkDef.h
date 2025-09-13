@@ -4,6 +4,7 @@
 #pragma link off all functions;
 
 #pragma link C++ class Hall + ;
+#pragma link C++ class Magnet + ;
 #pragma link C++ class Phos + ;
 #pragma link C++ class Stack + ;
 #pragma link C++ class GenBox + ;

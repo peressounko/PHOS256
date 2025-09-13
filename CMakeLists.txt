@@ -33,6 +33,7 @@ include(CheckCXXCompilerFlag)
 find_package(PYTHIA REQUIRED)
 find_package(GEANT4 REQUIRED)
 find_package(GEANT4VMC REQUIRED)
+#find_package(CLHEP REQUIRED)
 
   # ROOT configuration mandatory
   if(ROOTSYS)

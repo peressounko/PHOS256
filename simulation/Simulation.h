@@ -14,6 +14,7 @@
 
 // This project
 #include "Hall.h"
+#include "Magnet.h"
 #include "Phos.h"
 #include "Stack.h"
 #include "MagField.h"
@@ -37,6 +38,7 @@ class Simulation : public TVirtualMCApplication
   void RunMC(int nofEvents);
   void FinishRun();
 
+  void SetMagnet(Magnet* det) { fMagnet = det; }
   void SetPHOS(Phos* det) { fPHOS = det; }
   void SetGenerator(GenBox* gen) { fGenerator = gen; }
 
@@ -78,6 +80,7 @@ class Simulation : public TVirtualMCApplication
 
   // Calorimeter description
   Hall* fHall = nullptr;
+  Magnet * fMagnet = nullptr;
   Phos* fPHOS = nullptr;
 
   // processors

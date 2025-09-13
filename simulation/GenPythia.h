@@ -24,7 +24,6 @@ class GenPythia : public GenBox
   void SetStore(int kind){fStore = kind;}
 
 
-
  private:
   enum store{kAll=0,kFinalOnly};
   // data members

@@ -563,9 +563,11 @@ void Phos::CreateMaterials()
   new TGeoMedium("PCB", kPCB, mixPCB, param);
 
   // --- Stainless steel (let it be pure iron) ---
-  TGeoMixture* mixSteel = new TGeoMixture("STEEL", 1, density = 7.87);
-  mixPCB->AddElement(elFe, 1);
-  new TGeoMedium("STEEL", kSteel, mixSteel, param);
+  if(!gGeoManager->GetMedium("STEEL")){
+    TGeoMixture* mixSteel = new TGeoMixture("STEEL", 1, density = 7.87);
+    mixSteel->AddElement(elFe, 1);
+    new TGeoMedium("STEEL", kSteel, mixSteel, param);
+  }
 
   // --- Fiberglass ---
   TGeoMixture* mixFiberglas = new TGeoMixture("Fiberglas", 4, density = 1.9);

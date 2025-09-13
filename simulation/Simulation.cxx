@@ -104,6 +104,10 @@ void Simulation::ConstructGeometry()
     fHall = new Hall();
   fHall->CreateGeometry();
 
+  if(fMagnet){
+    fMagnet->CreateGeometry();
+  }
+
   // construct GEANT geometry
   if (!fPHOS) {
     std::cout << "Creating Default PHOS!!!" << std::endl;
