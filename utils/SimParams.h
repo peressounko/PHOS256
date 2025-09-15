@@ -1,6 +1,7 @@
 #ifndef SIMPARAMS_H
 #define SIMPARAMS_H
 
+#include <cmath>
 #include "TObject.h"
 
 class SimParams : public TObject
@@ -15,6 +16,15 @@ class SimParams : public TObject
     return fgSimParams;
   }
 
+  //Set working temperature in degrees
+  void SetTemperature(double T=10.){
+    //default T=-25; 
+    //change light yield 
+    fLightYieldPerGeV = 1530.*std::pow(1.02,-25.-T); //PHOS TDR
+    //change electronics noise
+    fAPDNoise = 0.004 * std::sqrt(1530./fLightYieldPerGeV); //PHOS operation without cooling, M.Yu.Bogolyubsky et al, 2008
+  }
+
  public:
   // Parameters used in conversion of deposited energy to APD response
   // float fLightYieldPerGeV = 526.; ///< Average number of photoelectrons per GeV: 1.983 gamma/MeV * 0.2655 PDE eff of APD
@@ -25,12 +35,11 @@ class SimParams : public TObject
   float fDeadTime = 20.;             ///< PHOS dead time (includes Read-out time i.e. mDeadTime>=mReadoutTime)
   float fReadoutTimePU = 2000.;      ///< Read-out time in ns if pileup simulation on in DigitizerSpec
   float fDeadTimePU = 30000.;        ///< PHOS dead time if pileup simulation on in DigitizerSpec
-  bool fSmearLightCollection = true; ///< Mimic light collection
   bool fApplyTimeResolution = false; ///< Apply time resolution in digitization
   bool fApplyNonLinearity = false;   ///< Apply energy non-linearity in digitization
   bool fSimulateNoise = true;        ///< Simulate noise in digitization
   bool fApplyDigitization = false;   ///< Apply energy digitization in digitization
-  float fAPDNoise = 0.001;           ///< RMS of APD noise
+  float fAPDNoise = 0.004;           ///< RMS of APD noise
   float fDigitThreshold = 2.;        ///< minimal energy to keep digit in ADC counts
   float fADCwidth = 0.005;           ///< width of ADC channel in GeV
   float fTOFa = 0.5e-9;              ///< constant term of TOF resolution
