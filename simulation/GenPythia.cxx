@@ -128,7 +128,7 @@ void GenPythia::Generate()
       continue;
     }
     toBeDone = 1;
-    if (fStore = kFinalOnly) {
+    if (fStore == kFinalOnly) {
       if (!fPythia->event[i].isFinal()) {
         labels.push_back(-1); // no such primary
         continue;
@@ -139,6 +139,7 @@ void GenPythia::Generate()
       }
     }
     if (abs(fPythia->event[i].id()) > 10000) { // Do not put fragments [100ZZZAAA0]
+      labels.push_back(-1); // no such primary
       continue;
     }
     // Check acceptance
@@ -147,6 +148,7 @@ void GenPythia::Generate()
     double pt = std::sqrt(fPythia->event[i].px() * fPythia->event[i].px() + fPythia->event[i].py() * fPythia->event[i].py());
     double theta = radToDeg * std::atan2(pt, fPythia->event[i].pz());
     if (phi < fPhiMin || phi > fPhiMax || theta < fThetaMin || theta > fThetaMax) {
+      labels.push_back(-1); // no such primary
       continue;
     }
 

@@ -75,13 +75,13 @@ void Stack::PushTrack(int toBeDone, int parent, int pdg,
   particle->SetPolarisation(polx, poly, polz);
   particle->SetWeight(weight);
   particle->SetUniqueID(mech);
+  fNPrimary++;
 
   // printf("toBeDone=%d, parent=%d, pdg=%d, fNPrimary=%d",toBeDone,parent,pdg, fNPrimary);
   // particle->Print() ;
 
   // if (parent < 0)
-  if (toBeDone)
-    fNPrimary++;
+  // if (toBeDone)
 
   if (toBeDone)
     fStack.push(particle);
@@ -98,13 +98,13 @@ TParticle* Stack::PopNextTrack(int& itrack)
 
   itrack = -1;
   if (fStack.empty())
-    return 0;
+    return static_cast<TParticle*>(nullptr);
 
   TParticle* particle = fStack.top();
   fStack.pop();
 
   if (!particle)
-    return 0;
+    return static_cast<TParticle*>(nullptr);
 
   fCurrentTrack = particle->GetSecondMother();
   itrack = fCurrentTrack;
@@ -119,8 +119,10 @@ TParticle* Stack::PopPrimaryForTracking(int i)
   /// \return   The popped primary particle object
   /// \param i  The index of primary particle to be popped
 
-  if (i < 0 || i >= fNPrimary)
-    Fatal("GetPrimaryForTracking", "Index %d out of range %d", i, fNPrimary);
+  if (i < 0 || i >= fNPrimary){
+    Error("GetPrimaryForTracking", "Index %d out of range %d", i, fNPrimary);
+    return static_cast<TParticle*>(nullptr);
+  }
 
   return (TParticle*)fParticles->At(i);
 }

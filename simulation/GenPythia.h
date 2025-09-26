@@ -30,7 +30,7 @@ class GenPythia : public GenBox
   Pythia8::Pythia         *fPythia;                //! The pythia8 instance
   Pythia8::Pythia         *fPythiaPartonLevel;     //! The pythia8 instance for the parton level object (used for superposition of events)
   std::string    fgXmldocPath;           //! path to xmldoc
-  int fStore = 1;                        //! store all particles or final only
+  int fStore = kAll;                     //! store all particles or final only
 
   ClassDef(GenPythia, 1) // GenPythia
 };
