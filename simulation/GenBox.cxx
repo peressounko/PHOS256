@@ -11,6 +11,7 @@
 // #include <TVirtualMCStack.h>
 
 #include "GenBox.h"
+#include "Stack.h"
 
 //_____________________________________________________________________________
 GenBox::GenBox(TVirtualMCStack* stack)
@@ -54,15 +55,18 @@ void GenBox::Generate()
     double random[3];
     gRandom->RndmArray(3, random);
 
+    // usniform solid angle d(cos Theta) d(phi)
     double pmom = fPtMin + random[0] * (fPtMax - fPtMin);
-    double theta = degToRad * (fThetaMin + random[1] * (fThetaMax - fThetaMin));
+    double cosMax = std::cos(degToRad * fThetaMin);
+    double cosMin = std::cos(degToRad * fThetaMax);
+    double cosTheta = cosMin + random[1] * (cosMax - cosMin);
     double phi = degToRad * (fPhiMin + random[2] * (fPhiMax - fPhiMin));
-    double pt = pmom * std::sin(theta);
+    double pt = pmom * std::sqrt(1. - cosTheta * cosTheta);
     double e = std::sqrt(pmom * pmom + m * m);
 
     p[0] = pt * std::cos(phi);
     p[1] = pt * std::sin(phi);
-    p[2] = pmom * std::cos(theta);
+    p[2] = pmom * cosTheta;
 
     // Add particle to stack
     /// \param toBeDone  1 if particles should go to tracking, 0 otherwise
@@ -85,5 +89,6 @@ void GenBox::Generate()
     /// \param is        generation status code
     fStack->PushTrack(toBeDone, -1, fIpart, p[0], p[1], p[2], e, origin[0], origin[1], origin[2], time, polx,
                       poly, polz, kPPrimary, ntr, 1., 0);
+    static_cast<Stack*>(TVirtualMC::GetMC()->GetStack())->StoreTrack(i);
   }
 }

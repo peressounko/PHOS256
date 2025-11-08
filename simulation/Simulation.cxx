@@ -104,7 +104,7 @@ void Simulation::ConstructGeometry()
     fHall = new Hall();
   fHall->CreateGeometry();
 
-  if(fMagnet){
+  if (fMagnet) {
     fMagnet->CreateGeometry();
   }
 
@@ -249,32 +249,18 @@ void Simulation::FinishEvent()
 
   // Call detectors
   fPHOS->FinishEvent();
+  fStack->Purge();
+  // change labels after purge
+  for (Hit& h : fHits) {
+    int newLabel = fStack->GetNewLabel(h.GetLabel());
+    h.SetLabel(newLabel);
+  }
+
   if (fDigitizer) {
     fDigitizer->ProcessEvent();
   }
   if (fClusterizer) {
     fClusterizer->ProcessEvent();
-  }
-
-  fStack->Purge();
-  int label;
-  float edep;
-  for (int i = 0; i < fDigits->GetEntriesFast(); i++) {
-    Digit* d = static_cast<Digit*>(fDigits->At(i));
-    for (int j = 0; j < d->GetNPrimaries(); j++) {
-      d->GetPrimary(j, label, edep);
-      int newLabel = fStack->GetNewLabel(label);
-      d->UpdateLabel(j, newLabel);
-    }
-  }
-  // same for clusters
-  for (int i = 0; i < fClusters->GetEntriesFast(); i++) {
-    Cluster* c = static_cast<Cluster*>(fClusters->At(i));
-    for (int j = 0; j < c->GetNumberOfLabels(); j++) {
-      c->GetLabel(j, label, edep);
-      int newLabel = fStack->GetNewLabel(label);
-      c->UpdateLabel(j, newLabel);
-    }
   }
 
   // fRootManager->Fill();

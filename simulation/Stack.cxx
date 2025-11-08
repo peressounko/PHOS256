@@ -14,7 +14,7 @@ ClassImp(Stack)
 
   //_____________________________________________________________________________
   Stack::Stack(int size)
-  : fParticles(0), fCurrentTrack(-1), fNPrimary(0)
+  : fParticles(0), fCurrentTrack(0), fCurrentTrackNumber(-1), fNPrimary(0)
 {
   /// Standard constructor
   /// \param size  The stack size
@@ -68,25 +68,23 @@ void Stack::PushTrack(int toBeDone, int parent, int pdg,
   const int kFirstDaughter = -1;
   const int kLastDaughter = -1;
 
-  int trackId = GetNtrack();
+  int trackId = fParticles->GetEntriesFast();
   TParticle* particle = new ((*fParticles)[trackId]) TParticle(pdg, is, parent,
                                                                trackId, kFirstDaughter, kLastDaughter, px, py, pz, e, vx, vy, vz, tof);
 
   particle->SetPolarisation(polx, poly, polz);
   particle->SetWeight(weight);
   particle->SetUniqueID(mech);
-  fNPrimary++;
+  if (toBeDone) {
+    particle->SetBit(kToBeDone);
+  } else {
+    particle->ResetBit(kToBeDone);
+  }
 
-  // printf("toBeDone=%d, parent=%d, pdg=%d, fNPrimary=%d",toBeDone,parent,pdg, fNPrimary);
-  // particle->Print() ;
-
-  // if (parent < 0)
-  // if (toBeDone)
-
-  if (toBeDone)
-    fStack.push(particle);
-
-  ntr = GetNtrack() - 1;
+  if (parent == -1) {
+    fNPrimary++;
+  }
+  ntr = trackId;
 }
 
 //_____________________________________________________________________________
@@ -96,20 +94,16 @@ TParticle* Stack::PopNextTrack(int& itrack)
   /// \return       The popped particle object
   /// \param track  The index of the popped track
 
-  itrack = -1;
-  if (fStack.empty())
-    return static_cast<TParticle*>(nullptr);
-
-  TParticle* particle = fStack.top();
-  fStack.pop();
-
-  if (!particle)
-    return static_cast<TParticle*>(nullptr);
-
-  fCurrentTrack = particle->GetSecondMother();
-  itrack = fCurrentTrack;
-
-  return particle;
+  fCurrentTrackNumber = fParticles->GetEntriesFast() - 1;
+  while (fCurrentTrackNumber >= 0) {
+    fCurrentTrack = static_cast<TParticle*>(fParticles->At(fCurrentTrackNumber));
+    if (fCurrentTrack->TestBit(kToBeDone)) {
+      fCurrentTrack->ResetBit(kToBeDone);
+      itrack = fCurrentTrackNumber;
+      return fCurrentTrack;
+    }
+    --fCurrentTrackNumber;
+  }
 }
 
 //_____________________________________________________________________________
@@ -119,12 +113,18 @@ TParticle* Stack::PopPrimaryForTracking(int i)
   /// \return   The popped primary particle object
   /// \param i  The index of primary particle to be popped
 
-  if (i < 0 || i >= fNPrimary){
+  if (i < 0 || i >= fParticles->GetEntriesFast()) {
     Error("GetPrimaryForTracking", "Index %d out of range %d", i, fNPrimary);
     return static_cast<TParticle*>(nullptr);
   }
-
-  return (TParticle*)fParticles->At(i);
+  fCurrentTrack = static_cast<TParticle*>(fParticles->At(i));
+  if (fCurrentTrack->TestBit(kToBeDone)) {
+    fCurrentTrack->ResetBit(kToBeDone);
+    return fCurrentTrack;
+  } else {
+    fCurrentTrack = nullptr;
+    return static_cast<TParticle*>(nullptr);
+  }
 }
 
 //_____________________________________________________________________________
@@ -145,7 +145,8 @@ void Stack::Reset()
 {
   /// Delete contained particles, reset particles array and stack.
 
-  fCurrentTrack = -1;
+  fCurrentTrackNumber = -1;
+  fCurrentTrack = nullptr;
   fNPrimary = 0;
   fParticles->Clear();
 }
@@ -156,7 +157,8 @@ void Stack::SetCurrentTrack(int track)
   /// Set the current track number to a given value.
   /// \param  track The current track number
 
-  fCurrentTrack = track;
+  fCurrentTrackNumber = track;
+  fCurrentTrack = GetParticle(track);
 }
 
 //_____________________________________________________________________________
@@ -180,12 +182,7 @@ TParticle* Stack::GetCurrentTrack() const
 {
   /// \return  The current track particle
 
-  TParticle* current = GetParticle(fCurrentTrack);
-
-  if (!current)
-    Warning("GetCurrentTrack", "Current track not found in the stack");
-
-  return current;
+  return fCurrentTrack;
 }
 
 //_____________________________________________________________________________
@@ -193,7 +190,7 @@ int Stack::GetCurrentTrackNumber() const
 {
   /// \return  The current track number
 
-  return fCurrentTrack;
+  return fCurrentTrackNumber;
 }
 
 //_____________________________________________________________________________
@@ -201,10 +198,8 @@ int Stack::GetCurrentParentTrackNumber() const
 {
   /// \return  The current track parent ID.
 
-  TParticle* current = GetCurrentTrack();
-
-  if (current)
-    return current->GetFirstMother();
+  if (fCurrentTrack)
+    return fCurrentTrack->GetFirstMother();
   else
     return -1;
 }
@@ -218,7 +213,7 @@ TParticle* Stack::GetParticle(int id) const
   if (id < 0 || id >= fParticles->GetEntriesFast())
     Fatal("GetParticle", "Index %d out of range= %d", id, fParticles->GetEntriesFast());
 
-  return (TParticle*)fParticles->At(id);
+  return static_cast<TParticle*>(fParticles->At(id));
 }
 //_____________________________________________________________________________
 void Stack::StoreTrack(int track) // mark trask to be stored
@@ -229,17 +224,17 @@ void Stack::StoreTrack(int track) // mark trask to be stored
     return;
   }
   TParticle* p = static_cast<TParticle*>(fParticles->At(track));
-  if (p->GetFirstDaughter() == 0) { // already marked
+  if (p->TestBit(kKeep)) { // already marked
     return;
   }
-  p->SetFirstDaughter(0);
+  p->SetBit(kKeep);
   track = p->GetMother(0);
   while (track >= 0) {
     p = static_cast<TParticle*>(fParticles->At(track));
-    if (p->GetFirstDaughter() == 0) { // already marked
+    if (p->TestBit(kKeep)) { // already marked
       return;
     }
-    p->SetFirstDaughter(0);
+    p->SetBit(kKeep);
     track = p->GetMother(0);
   }
   return;
@@ -255,19 +250,18 @@ void Stack::Purge()
   fLabels.reserve(fParticles->GetEntriesFast());
   int iToKeep = 0;
   TParticle* pNew = nullptr;
-  // printf("PURGE: particls=%d \n",fParticles->GetEntriesFast()) ;
-  for (int i = 0; i < fParticles->GetEntriesFast(); i++) {
+  int n = fParticles->GetEntriesFast();
+  for (int i = 0; i < n; i++) {
     TParticle* p = static_cast<TParticle*>(fParticles->At(i));
-    // printf("i=%d, E=%f, toKeep=%d \n",i,p->Energy(),p->GetFirstDaughter()) ;
-    if (p->GetFirstDaughter() == 0) { // keep
-      fLabels.push_back(iToKeep);     // new position
-      if (i == iToKeep) {             // no need to copy
+    if (p->TestBit(kKeep)) {      // keep
+      fLabels.push_back(iToKeep); // new position
+      if (i == iToKeep) {         // no need to copy
         if (p->GetMother(0) >= 0) {
           p->SetMother(0, fLabels[p->GetMother(0)]);
         }
       } else { // copy to new position
         pNew = static_cast<TParticle*>(fParticles->At(iToKeep));
-        pNew = p;
+        *pNew = *p;
         if (p->GetMother(0) >= 0) {
           pNew->SetMother(0, fLabels[p->GetMother(0)]);
         }

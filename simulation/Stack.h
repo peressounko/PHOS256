@@ -45,12 +45,14 @@ class Stack : public TVirtualMCStack
   TClonesArray* GetParticles() { return fParticles; }
 
  private:
-  // data members
-  std::stack<TParticle*> fStack;      //!< The stack of particles (transient)
+  enum { kKeep = 1,
+         kToBeDone = 2,
+         kTransport = 4 };
   TClonesArray* fParticles = nullptr; ///< The array of particle (persistent)
-  int fCurrentTrack = -1;             ///< The current track number
+  TParticle* fCurrentTrack = nullptr; ///< The current track number
   int fNPrimary = 0;                  ///< The number of primaries
-  std::vector<int> fLabels;           ///< remapping of labels
+  int fCurrentTrackNumber = 0;
+  std::vector<int> fLabels; ///< remapping of labels
 
   ClassDef(Stack, 1) // Stack
 };

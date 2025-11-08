@@ -44,9 +44,10 @@ class Hit : public TObject
 
   int GetCellID() const { return fCellID; }
 
-  float GetE() const { return fE; };
+  float GetE() const { return fE; }
 
-  int GetLabel() const { return fLabel; };
+  int GetLabel() const { return fLabel; }
+  void SetLabel(int l) { fLabel = l; };
 
   float GetTime() const { return fTime; };
 

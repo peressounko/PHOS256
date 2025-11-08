@@ -74,7 +74,7 @@ bool GenPythia::Initialize(int idAin, int idBin, double eLab)
     fPythia->readString(Form("Beams:eA = %13.4f", eLab));
     // get mass of the target
     // int A = (idBin % 10000) / 10;
-     // If the particle energy is smaller than its mass it is assumed to be at rest. 
+    // If the particle energy is smaller than its mass it is assumed to be at rest.
     // fPythia->readString(Form("Beams:eB =  0.")); //, A * 0.93827208944));
     // // Initialize the Angantyr model to fit the total and semi-includive
     // // cross sections in Pythia within some tolerance.
@@ -124,13 +124,13 @@ void GenPythia::Generate()
   fNofPrimaries = 0;
   for (int i = 0; i < fPythia->event.size(); i++) {
     if (fPythia->event[i].id() == 90) {
-      labels.push_back(-1); // no such primary
+      labels[i] = -1; // no such primary
       continue;
     }
     toBeDone = 1;
     if (fStore == kFinalOnly) {
       if (!fPythia->event[i].isFinal()) {
-        labels.push_back(-1); // no such primary
+        labels[i] = -1; // no such primary
         continue;
       }
     } else {
@@ -138,18 +138,20 @@ void GenPythia::Generate()
         toBeDone = 0;
       }
     }
-    if (abs(fPythia->event[i].id()) > 10000) { // Do not put fragments [100ZZZAAA0]
-      labels.push_back(-1); // no such primary
-      continue;
-    }
-    // Check acceptance
-    const double radToDeg = 180. / M_PI;
-    double phi = radToDeg * std::atan2(fPythia->event[i].py(), fPythia->event[i].px());
-    double pt = std::sqrt(fPythia->event[i].px() * fPythia->event[i].px() + fPythia->event[i].py() * fPythia->event[i].py());
-    double theta = radToDeg * std::atan2(pt, fPythia->event[i].pz());
-    if (phi < fPhiMin || phi > fPhiMax || theta < fThetaMin || theta > fThetaMax) {
-      labels.push_back(-1); // no such primary
-      continue;
+    // if (abs(fPythia->event[i].id()) > 10000) { // Do not put fragments [100ZZZAAA0]
+    //   labels[i]=-1; // no such primary
+    //   continue;
+    // }
+    // Check acceptance only for final, others will be purged later
+    if (toBeDone) {
+      const double radToDeg = 180. / M_PI;
+      double phi = radToDeg * std::atan2(fPythia->event[i].py(), fPythia->event[i].px());
+      double pt = std::sqrt(fPythia->event[i].px() * fPythia->event[i].px() + fPythia->event[i].py() * fPythia->event[i].py());
+      double theta = radToDeg * std::atan2(pt, fPythia->event[i].pz());
+      if (phi < fPhiMin || phi > fPhiMax || theta < fThetaMin || theta > fThetaMax) {
+        labels[i] = -1; // no such primary
+        continue;
+      }
     }
 
     // Add particle to stack
@@ -189,7 +191,7 @@ void GenPythia::Generate()
                       ntr,
                       1.,
                       0);
-    labels.push_back(ntr);
+    labels[i] = ntr;
     fNofPrimaries++;
   }
 }
