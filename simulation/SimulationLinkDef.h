@@ -8,9 +8,10 @@
 #pragma link C++ class Phos + ;
 #pragma link C++ class Stack + ;
 #pragma link C++ class GenBox + ;
+#pragma link C++ class GenMuon + ;
 #pragma link C++ class GenPythia + ;
+#pragma link C++ class GenPolPhoton + ;
 #pragma link C++ class MagField + ;
 #pragma link C++ class Digitizer + ;
-#pragma link C++ class Clusterizer + ;
 #pragma link C++ class Simulation + ;
 #endif
