@@ -49,6 +49,7 @@ void Config()
 
   // TG4RunConfiguration* runConfiguration
   //= new TG4RunConfiguration("geomRoot", "FTFP_BERT", "stepLimiter+specialCuts");
+  // TG4RunConfiguration* runConfiguration = new TG4RunConfiguration("geomRoot", "FTFP_BERT+optical", "stepLimiter");
   TG4RunConfiguration* runConfiguration = new TG4RunConfiguration("geomRoot", "FTFP_BERT+optical", "stepLimiter");
 
   /// Create the G4 VMC
@@ -61,19 +62,6 @@ void Config()
   //  stack->SetMinPoints(0);
   geant4->SetStack(stack);
 
-  /// create Fair Specific stack
-  //   MpdStack *stack = new MpdStack(1000);
-  //   stack->StoreSecondaries(kTRUE);
-  //  stack->SetMinPoints(0);
-  //   geant4->SetStack(stack);
-
-  // AZ if(FairRunSim::Instance()->IsExtDecayer()){
-  /* We don't have Pythia6 anymore
-  if(FairRunSim::Instance()->IsExtDecayer() && !geant4->GetDecayer()){ //AZ
-     TVirtualMCDecayer* decayer = TPythia6Decayer::Instance();
-     geant4->SetExternalDecayer(decayer);
-  }
-  */
 
   /// Customise Geant4 setting
   /// (verbose level, global range cut, ..)

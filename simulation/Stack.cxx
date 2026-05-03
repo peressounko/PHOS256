@@ -104,6 +104,7 @@ TParticle* Stack::PopNextTrack(int& itrack)
     }
     --fCurrentTrackNumber;
   }
+  return nullptr;
 }
 
 //_____________________________________________________________________________

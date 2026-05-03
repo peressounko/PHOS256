@@ -94,4 +94,5 @@ find_package(GEANT4VMC REQUIRED)
   add_subdirectory(utils)
   add_subdirectory(dataformats)
   add_subdirectory(simulation)
+  add_subdirectory(raw)
 

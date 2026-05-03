@@ -1,8 +1,9 @@
-# Create a library called "libDataFormats" which includes the source files given in the array .
-Set(LibName "DataFormats")
+# Create a library called "libRaw" which includes the source files given in the array .
+Set(LibName "Raw")
 
 set(INCLUDE_DIRECTORIES 
   ${PHOS256_SOURCE_DIR}/utils
+  ${PHOS256_SOURCE_DIR}/dataformats
   ${ROOT_INCLUDE_DIRS}
   ${CMAKE_CURRENT_LIST_DIR}
 )
@@ -20,10 +21,10 @@ set(LINK_DIRECTORIES
 link_directories(${LINK_DIRECTORIES})
 
 # List of source files
-set(SRCS Hit.cxx Cell.h Digit.cxx Cluster.cxx BadChannelsMap.cxx CalibParams.cxx
+set(SRCS Mapping.cxx  RawReader.cxx Fitter.cxx FitterH.cxx Clusterizer.cxx Reconstruction.cxx
 )
 
-set(HDRS Hit.h Cell.h Digit.h Cluster.h BadChannelsMap.h CalibParams.h
+set(HDRS Mapping.h event.h RawDataHeader.h RawReader.h Fitter.h FitterH.h Clusterizer.h Reconstruction.h
 )
 
 # Generate the dictionary
@@ -35,7 +36,7 @@ set(ROOT_DEPENDENCIES Core)
 
 # Generate the ROOT map
 # Dependecies
-set(LIBDEPS ${ROOT_DEPENDENCIES})
+set(LIBDEPS ${ROOT_DEPENDENCIES} Utils DataFormats)
 generate_rootmap("${LibName}" "${LIBDEPS}" "${CMAKE_CURRENT_SOURCE_DIR}/${LibName}LinkDef.h")
 
 # Create an object to be reused in case of static libraries
@@ -43,7 +44,7 @@ generate_rootmap("${LibName}" "${LIBDEPS}" "${CMAKE_CURRENT_SOURCE_DIR}/${LibNam
 add_library(${LibName}-object OBJECT ${SRCS} G__${LibName}.cxx)
 # Add a library to the project using the object
 add_library(${LibName} SHARED $<TARGET_OBJECTS:${LibName}-object>)
-target_link_libraries(${LibName} ${ROOT_DEPENDENCIES})
+target_link_libraries(${LibName} ${ROOT_DEPENDENCIES} Utils DataFormats)
 
 # Setting the correct headers for the object as gathered from the dependencies
 target_include_directories(${LibName}-object PUBLIC $<TARGET_PROPERTY:${LibName},INCLUDE_DIRECTORIES>)
@@ -66,3 +67,7 @@ install(TARGETS ${LibName}
         LIBRARY DESTINATION lib)
 
 install(FILES ${HDRS} DESTINATION include)
+
+install(
+  FILES Mapping/Mapping.data
+  DESTINATION share/Mapping/)

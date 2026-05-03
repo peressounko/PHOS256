@@ -4,6 +4,9 @@
 #pragma link off all functions;
 
 #pragma link C++ class Hit + ;
+#pragma link C++ class Cell + ;
 #pragma link C++ class Digit + ;
 #pragma link C++ class Cluster + ;
+#pragma link C++ class std::vector <Cell> + ;
+
 #endif
