@@ -55,7 +55,6 @@ void GenMuon::Generate()
 
   int ntr;
   const double m = 0.1056583755;
-  const double distTrigZ = 60.; // Distance between triggers
 
   const double degToRad = M_PI / 180.;
 
@@ -100,7 +99,7 @@ void GenMuon::Generate()
 
       double scale = 0.;
       if (p[2] > 0) {
-        scale = distTrigZ / p[2];
+        scale = fDistTrigZ / p[2];
       }
       double xNew = origin[0] + p[0] * scale;
       double yNew = origin[1] + p[1] * scale;

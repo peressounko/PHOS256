@@ -44,13 +44,14 @@ class GenMuon : public GenBox
   double fIntMax = 0.;
   double fTr1X0 = 0.;
   double fTr1Y0 = 0.;
-  double fTr1Dx = 16.;
-  double fTr1Dy = 16.;
+  double fTr1Dx = 18.1;
+  double fTr1Dy = 18.1;
   bool fUseSecondTr = false;
+  double fDistTrigZ = 115.; // Distance between triggers
   double fTr2X0 = 0.;
   double fTr2Y0 = 0.;
-  double fTr2Dx = 16.;
-  double fTr2Dy = 16.;
+  double fTr2Dx = 18.1;
+  double fTr2Dy = 18.1;
 
   ClassDef(GenMuon, 1) // GenMuon
 };
