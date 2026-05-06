@@ -34,6 +34,14 @@ class Reconstruction
 
   void SetRawFileName(std::string rawfilename) { fRawfilename = rawfilename; }
 
+  // configure Fitter etc
+  void SetFitter(int i) { fFitterType = i; }
+  void SetNPreSamples(int i)
+  {
+    fSubractPeds = true;
+    fNPreSampels = i;
+  }
+
  protected:
   void Init();
   void Reset();
@@ -50,6 +58,10 @@ class Reconstruction
   int fEventSelection = 7;
 
   bool fMakeClu = false;
+
+  bool fSubractPeds = false;
+  int fNPreSampels = 10;
+  int fFitterType = 0; // Fitters 0: MaxAmp, 1: Fit Gamma2
 
   std::string fRawfilename = "";
 

@@ -75,10 +75,10 @@ Fitter::FitStatus Fitter::Evaluate(const unsigned short* signal, int sigLength)
   }
   mAmp = (float)mMaxSample; // maximal amplitude
 
-  float pedestal = 0;
   if (mPedSubtract) {
     if (nPed > 0) {
       pedMean /= nPed;
+      mAmp -= pedMean;
     } else {
       mAmp = 0.;
       mTime = -2;
@@ -136,7 +136,7 @@ Fitter::FitStatus Fitter::Evaluate(const unsigned short* signal, int sigLength)
 
   // Find index posK (kLevel is a level of "timestamp" point Tk):
   int posK = sigLength - 1; // last point before crossing k-level
-  float levelK = pedestal + kAmp * mAmp;
+  float levelK = pedMean + kAmp * mAmp;
   while (posK >= 0 && signal[posK] <= levelK) {
     posK--;
   }
@@ -167,7 +167,7 @@ Fitter::FitStatus Fitter::Evaluate(const unsigned short* signal, int sigLength)
     }
     // Point below crossing point
     if (idn < sigLength) {
-      if (signal[idn] < pedestal) {
+      if (signal[idn] < pedMean) {
         idn = sigLength - 1; // do not scan further
         idn++;
         continue;

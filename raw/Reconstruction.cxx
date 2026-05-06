@@ -1,5 +1,7 @@
 #include <algorithm>
+#include <iostream>
 #include "Digit.h"
+#include "FitterH.h"
 #include "Reconstruction.h"
 
 //_______________________________________
@@ -57,9 +59,10 @@ bool Reconstruction::MakeDigits()
   int nPreSamples = fRawReader->GetNPretriggerSamples();
   uint value = fRawReader->GetAltroCFG1();
   bool zeroSuppressionEnabled = (value >> 15) & 0x1;
-  fFitter->SetPedSubtract(!zeroSuppressionEnabled);
-  // fFitter.SetNPresamples(fRawReader->GetNPresamples());
-  fFitter->SetNPresamples(nPreSamples);
+  if (!fSubractPeds) {
+    fFitter->SetPedSubtract(!zeroSuppressionEnabled);
+    fFitter->SetNPresamples(fRawReader->GetNPretriggerSamples());
+  }
   int offset = 0;
   int threshold = 0;
   if (zeroSuppressionEnabled) {
@@ -171,7 +174,22 @@ void Reconstruction::Init()
   fCells.reserve(2 * NCELLS);
   fDigits->Expand(NCELLS);
 
-  fFitter = new Fitter();
+  if (fFitterType == 0) {
+    std::cout << "Create default Fitter (Max amp)" << std::endl;
+    fFitter = new Fitter();
+  } else {
+    if (fFitterType == 1) {
+      std::cout << "Create Gamma2 Fitter " << std::endl;
+      fFitter = new FitterH();
+    } else {
+      std::cout << "Do not know fitter type " << fFitterType << " so far 0 and 1 exist" << std::endl;
+      abort();
+    }
+  }
+  if (fSubractPeds) {
+    fFitter->SetPedSubtract(true);
+    fFitter->SetNPresamples(fNPreSampels);
+  }
 }
 
 //_______________________________________
