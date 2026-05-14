@@ -17,20 +17,20 @@ GenPythia::GenPythia(const char* xmlDir)
   fPythia = new Pythia8::Pythia(xmlDir);
 }
 
-void GenPythia::SetPythiaSeed(UInt_t seed)
-{
-  //
-  // set seed in PYTHIA8
-  // NB. 900000000 is the maximum seed (0 is not allowed)
-  //
-  fPythia->readString("Random:setSeed = on");
-  fPythia->readString(Form("Random:seed = %d", (seed % 900000000) + 1));
+// void GenPythia::SetPythiaSeed(UInt_t seed)
+// {
+//   //
+//   // set seed in PYTHIA8
+//   // NB. 900000000 is the maximum seed (0 is not allowed)
+//   //
+//   fPythia->readString("Random:setSeed = on");
+//   fPythia->readString(Form("Random:seed = %d", (seed % 900000000) + 1));
 
-  if (fPythiaPartonLevel) {
-    fPythiaPartonLevel->readString("Random:setSeed = on");
-    fPythiaPartonLevel->readString(Form("Random:seed = %d", (seed % 900000000) + 1));
-  }
-}
+//   if (fPythiaPartonLevel) {
+//     fPythiaPartonLevel->readString("Random:setSeed = on");
+//     fPythiaPartonLevel->readString(Form("Random:seed = %d", (seed % 900000000) + 1));
+//   }
+// }
 
 // Pythia8::Pythia* AliTPythia8::GetPythiaPartonLevel()
 // {
@@ -89,6 +89,7 @@ bool GenPythia::Initialize(int idAin, int idBin, double eLab)
   }
 
   fPythia->readString("Random:setSeed = on");
+  fPythia->readString(Form("Random:seed = %d", fSeed)); // Zero: used seed from timer
   fPythia->readString("HadronLevel:Hadronize = on");
 
   fPythia->readString("HardQCD:all = on");
