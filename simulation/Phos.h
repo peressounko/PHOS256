@@ -22,6 +22,8 @@ class Phos
   Phos(float r, float theta);
   ~Phos() = default;
 
+  void CreateConverter() { fCreateConterter = true; }
+
   // prepare materials, mixtures and media for calorimeter
   void CreateMaterials();
 
@@ -37,8 +39,8 @@ class Phos
   void FinishPrimary();
 
  protected:
-  void CreateGeometryforEMC(void); // creates the PHOS geometry for GEANT
-  // void CreateGeometryforSupport(void); // creates the Support geometry for GEANT
+  void CreateGeometryforEMC(void);    // creates the PHOS geometry for GEANT
+  void CreateConverterGeometry(void); // creates converter in fronnt of PHOS
   void AddHit(int primary, int id, float* hits);
 
  private:
@@ -51,7 +53,8 @@ class Phos
                    kPCB,
                    kSteel,
                    kFiberglas,
-                   kCables }; // start numbers after Hall media
+                   kCables };    // start numbers after Hall media
+  bool fCreateConterter = false; // do not create converted by default
   // Simulation
   std::map<int, int> fSuperParents;  //! map of current tracks to SuperParents: entered PHOS active volumes particles
   std::vector<Hit>* fHits = nullptr; //! Collection of PHOS hits

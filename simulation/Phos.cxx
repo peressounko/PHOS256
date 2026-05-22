@@ -563,7 +563,7 @@ void Phos::CreateMaterials()
   new TGeoMedium("PCB", kPCB, mixPCB, param);
 
   // --- Stainless steel (let it be pure iron) ---
-  if(!gGeoManager->GetMedium("STEEL")){
+  if (!gGeoManager->GetMedium("STEEL")) {
     TGeoMixture* mixSteel = new TGeoMixture("STEEL", 1, density = 7.87);
     mixSteel->AddElement(elFe, 1);
     new TGeoMedium("STEEL", kSteel, mixSteel, param);
@@ -618,4 +618,27 @@ void Phos::CreateGeometry()
   float pos[3] = {0};
   geom->GetModuleCenter(pos);
   gGeoManager->Node("PHOS", 0, "World", pos[0], pos[1], pos[2], idrotm, true, static_cast<double*>(nullptr));
+
+  if (fCreateConterter) {
+    CreateConverterGeometry();
+    // plase converter in front of module
+    // Distance to PHOS surface
+    float dConv = 10.;
+    float theta = -angle[2][0];
+    pos[0] = 0;
+    pos[1] = (geom->GetIPtoOuterCoverDistance() - dConv) * std::sin(theta * M_PI / 180.0);
+    pos[2] = (geom->GetIPtoOuterCoverDistance() - dConv) * std::cos(theta * M_PI / 180.0);
+
+    gGeoManager->Node("CONV", 1, "World", pos[0], pos[1], pos[2], idrotm, true, static_cast<double*>(nullptr));
+  }
+}
+//____________________________________________________________________________
+void Phos::CreateConverterGeometry()
+{
+
+  // create STEEL converter in front of PHOS
+
+  float par[3] = {20., 20., 2.};
+  int imed = gGeoManager->GetMedium("STEEL")->GetId();
+  gGeoManager->Volume("CONV", "BOX ", imed, par, 3);
 }
