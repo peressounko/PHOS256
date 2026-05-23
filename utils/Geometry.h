@@ -50,6 +50,10 @@ class Geometry : public TObject
   // calculate impact position on PHOS
   bool ImpactOnPHOS(const TVector3& p, float& z, float& x);
 
+
+  float GetPHOSAngle()const{return fModTheta;}
+  float GetRtoCrystalls()const{return fIPtoCrystalSurface;}
+
   // Return general PHOS parameters
   void GetModuleAngles(float angle[3][2]) const;
   void GetModuleCenter(float pos[3]) const;

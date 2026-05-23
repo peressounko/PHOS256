@@ -592,7 +592,7 @@ void Phos::CreateGeometry()
   // Create the PHOS geometry for Geant
 
   const Geometry* geom = Geometry::Instance();
-  std::cout << "Phos::CreateGeometry, geom=" << geom << std::endl;
+  std::cout << "Phos::CreateGeometry, theta = " << geom->GetPHOSAngle() << " R = " << geom->GetRtoCrystalls() << std::endl;
 
   // Create a PHOS module.
   // Gsvolu accepts non-const params. Avoid modification geometry
