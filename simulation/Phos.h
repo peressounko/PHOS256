@@ -22,7 +22,7 @@ class Phos
   Phos(float r, float theta);
   ~Phos() = default;
 
-  void CreateConverter() { fCreateConterter = true; }
+  void CreateConverter(float d=10., float h=2.) { fCreateConterter = true; fConvDist = d; fConvThickness = h;}
 
   // prepare materials, mixtures and media for calorimeter
   void CreateMaterials();
@@ -55,6 +55,8 @@ class Phos
                    kFiberglas,
                    kCables };    // start numbers after Hall media
   bool fCreateConterter = false; // do not create converted by default
+  float fConvDist = 10.;         // distance from crystall surface to converter
+  float fConvThickness = 2.;
   // Simulation
   std::map<int, int> fSuperParents;  //! map of current tracks to SuperParents: entered PHOS active volumes particles
   std::vector<Hit>* fHits = nullptr; //! Collection of PHOS hits

@@ -623,11 +623,10 @@ void Phos::CreateGeometry()
     CreateConverterGeometry();
     // plase converter in front of module
     // Distance to PHOS surface
-    float dConv = 10.;
     float theta = -angle[2][0];
     pos[0] = 0;
-    pos[1] = (geom->GetIPtoOuterCoverDistance() - dConv) * std::sin(theta * M_PI / 180.0);
-    pos[2] = (geom->GetIPtoOuterCoverDistance() - dConv) * std::cos(theta * M_PI / 180.0);
+    pos[1] = (geom->GetIPtoOuterCoverDistance() - fConvDist) * std::sin(theta * M_PI / 180.0);
+    pos[2] = (geom->GetIPtoOuterCoverDistance() - fConvDist) * std::cos(theta * M_PI / 180.0);
 
     gGeoManager->Node("CONV", 1, "World", pos[0], pos[1], pos[2], idrotm, true, static_cast<double*>(nullptr));
   }
@@ -638,7 +637,7 @@ void Phos::CreateConverterGeometry()
 
   // create STEEL converter in front of PHOS
 
-  float par[3] = {20., 20., 2.};
+  float par[3] = {20., 20., fConvThickness};
   int imed = gGeoManager->GetMedium("STEEL")->GetId();
   gGeoManager->Volume("CONV", "BOX ", imed, par, 3);
 }
