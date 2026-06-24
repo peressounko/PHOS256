@@ -156,12 +156,16 @@ void Cluster::EvalAll()
 
     fLambda2 = 0.5 * (dxx + dzz) + std::sqrt(0.25 * (dxx - dzz) * (dxx - dzz) + dxz * dxz);
     fLambda1 = 0.5 * (dxx + dzz) - std::sqrt(0.25 * (dxx - dzz) * (dxx - dzz) + dxz * dxz);
-    if (fLambda2 > 0)
+    if (fLambda2 > 0) {
       fLambda2 = std::sqrt(fLambda2);
-    if (fLambda1 > 0)
+      fphi2 = std::atan2(-dxx + fLambda2, dxz);
+    }
+    if (fLambda1 > 0) {
       fLambda1 = std::sqrt(fLambda1);
+      fphi1 = std::atan2(-dxx + fLambda1, dxz);
+    }
   } else {
-    fLambda2 = fLambda1 = 0.;
+    fLambda2 = fLambda1 = fphi1 = fphi2 = 0.;
   }
   fLocX = x;
   fLocZ = z;

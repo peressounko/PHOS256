@@ -100,6 +100,12 @@ class Cluster : public TObject
     l2 = fLambda2;
   }
 
+  // Dispersion parameters
+  void GetLambdaPhi(float& phi1, float& phi2)
+  {
+    phi1 = fphi1;
+    phi2 = fphi2;
+  }
   static double ShowerShape(double dx, double dz); // Parameterization of EM shower
 
  protected:
@@ -138,6 +144,8 @@ class Cluster : public TObject
   float fChi2 = 0;    // Chi2 of a fit with EM shape
   float fLambda1 = 0; // smaller Disp axis
   float fLambda2 = 0; // larger Disp axis
+  float fphi1 = 0.;   // eigen vector orientation for long axis
+  float fphi2 = 0.;   // eigen vector orientation for short axis
 
   int fNExLM = 0; // Number of local maxima or NLM in parent cluster before unfolding
 
