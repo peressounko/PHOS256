@@ -31,7 +31,7 @@ class GenPolPhoton : public GenBox
     fPhiMin = phimin;
     fPhiMax = phimax;
   }
-  virtual void SetPolarization(double theta) { fPolAngle = theta; }
+  virtual void SetPolarization(double phi) { fPolAngle = phi; }
 
   void SetStack(TVirtualMCStack* stack) { fStack = stack; }
 

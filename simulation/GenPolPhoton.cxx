@@ -64,11 +64,18 @@ void GenPolPhoton::Generate()
 
     // Polarization
     ROOT::Math::XYZVector mom(p[0], p[1], p[2]);
-    ROOT::Math::XYZVector ax(std::sin(degToRad * fPolAngle), std::cos(degToRad * fPolAngle), 0.);
-    ROOT::Math::XYZVector polVector = ax.Cross(mom.Unit()); // transverse polarization in the direction of fPolAngle
-    double polx = polVector.X();
-    double poly = polVector.Y();
-    double polz = polVector.Z();
+    mom = mom.Unit();
+    ROOT::Math::XYZVector ax(std::cos(degToRad * fPolAngle), std::sin(degToRad * fPolAngle), 0.);
+    ROOT::Math::XYZVector polVector = ax - ax.Dot(mom)*mom; // transverse polarization in the direction of fPolAngle
+    polVector = polVector.Unit();
+    double polx=0.,poly=0.,polz=0.;
+    if(abs(polVector.X())>abs(polVector.Y())){
+      polx = 1.;
+    }
+    else{
+      poly = 1.;
+    }
+
 
     // Add particle to stack
     /// \param toBeDone  1 if particles should go to tracking, 0 otherwise
