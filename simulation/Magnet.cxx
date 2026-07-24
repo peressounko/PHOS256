@@ -5,6 +5,7 @@
 #include <TVirtualMC.h>
 
 #include "Magnet.h"
+#include "Phos.h" //for material numbering
 
 //_____________________________________________________________________________
 void Magnet::CreateGeometry()
@@ -15,7 +16,7 @@ void Magnet::CreateGeometry()
   // std::cout << "Magnet creating geometry" << std::endl;
 
   // Paremeter for tracking media
-  Double_t param[20];
+  double param[20];
   param[0] = 0;     // isvol  - Not used
   param[1] = 0;     // ifield - User defined magnetic field
   param[2] = 10.;   // fieldm - Maximum field value (in kiloGauss)
@@ -28,12 +29,13 @@ void Magnet::CreateGeometry()
     param[i] = 0.;
 
   // --- Stainless steel (let it be pure iron) ---
+
   if (!gGeoManager->GetMedium("STEEL")) {
     double a, z, density;
-    TGeoMixture* mixSteel = new TGeoMixture("STEEL", 1, density = 7.87);
+    TGeoMixture* mixSteel = new TGeoMixture("STEEL", kSteel, density = 7.87);
     TGeoElement* elFe = new TGeoElement("Ferrum", "Fe", z = 26., a = 55.845);
     mixSteel->AddElement(elFe, 1);
-    new TGeoMedium("STEEL", 2, mixSteel, param);
+    new TGeoMedium("STEEL", kSteel, mixSteel, param);
   }
   int imed = gGeoManager->GetMedium("STEEL")->GetId();
 

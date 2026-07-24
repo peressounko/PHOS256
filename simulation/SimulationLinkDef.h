@@ -14,4 +14,5 @@
 #pragma link C++ class MagField + ;
 #pragma link C++ class Digitizer + ;
 #pragma link C++ class Simulation + ;
+#pragma link C++ class RunConfigurationPol + ;
 #endif

@@ -31,13 +31,15 @@ class GenPolPhoton : public GenBox
     fPhiMin = phimin;
     fPhiMax = phimax;
   }
-  virtual void SetPolarization(double phi) { fPolAngle = phi; }
+  void SetPolarization(double phi) { fPolAngle = phi; }
+  void SetUniformPolarization() { fUniformPol = true; }
 
   void SetStack(TVirtualMCStack* stack) { fStack = stack; }
 
  protected:
   // data members
-  double fPolAngle = 90.; ///< degree
+  bool fUniformPol = false; ///< generate uniform polarization if true
+  double fPolAngle = 90.;   ///< degree
 
   ClassDef(GenPolPhoton, 1) // GenPolPhoton
 };

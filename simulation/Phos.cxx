@@ -525,10 +525,12 @@ void Phos::CreateMaterials()
   TGeoElement* elCu = new TGeoElement("Cuprum", "Cu", z = 29., a = 63.546);
 
   // --- Air ---
-  TGeoMixture* mixAir = new TGeoMixture("Air", 2, density = 1.29e-03);
-  mixAir->AddElement(elN, 0.7);
-  mixAir->AddElement(elO, 0.3);
-  new TGeoMedium("AIR", kAir, mixAir, param);
+  if (!gGeoManager->GetMedium("AIR")) {
+    TGeoMixture* mixAir = new TGeoMixture("Air", 2, density = 1.29e-03);
+    mixAir->AddElement(elN, 0.7);
+    mixAir->AddElement(elO, 0.3);
+    new TGeoMedium("AIR", kAir, mixAir, param);
+  }
 
   TGeoMixture* mixPWO = new TGeoMixture("PbWO4", 3, density = 8.28);
   mixPWO->AddElement(elPb, 1);

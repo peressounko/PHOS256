@@ -15,6 +15,7 @@
 //_____________________________________________________________________________
 GenPolPhoton::GenPolPhoton(TVirtualMCStack* stack)
   : GenBox(stack),
+    fUniformPol(false),
     fPolAngle(0.)
 {
   fNofPrimaries = 1;
@@ -65,17 +66,19 @@ void GenPolPhoton::Generate()
     // Polarization
     ROOT::Math::XYZVector mom(p[0], p[1], p[2]);
     mom = mom.Unit();
+    if (fUniformPol) {
+      fPolAngle = gRandom->Uniform() * 180.;
+    }
     ROOT::Math::XYZVector ax(std::cos(degToRad * fPolAngle), std::sin(degToRad * fPolAngle), 0.);
-    ROOT::Math::XYZVector polVector = ax - ax.Dot(mom)*mom; // transverse polarization in the direction of fPolAngle
+    ROOT::Math::XYZVector polVector = ax - ax.Dot(mom) * mom; // transverse polarization in the direction of fPolAngle
     polVector = polVector.Unit();
-    double polx=0.,poly=0.,polz=0.;
-    if(abs(polVector.X())>abs(polVector.Y())){
-      polx = 1.;
-    }
-    else{
-      poly = 1.;
-    }
-
+    double polx = polVector.X(), poly = polVector.Y(), polz = polVector.Z();
+    // if(abs(polVector.X())>abs(polVector.Y())){
+    //   polx = 1.;
+    // }
+    // else{
+    //   poly = 1.;
+    // }
 
     // Add particle to stack
     /// \param toBeDone  1 if particles should go to tracking, 0 otherwise

@@ -11,6 +11,18 @@
 // --- PHOS256 header files ---
 #include "Hit.h"
 
+// Materials for all volumes, including Hall, PHOS256 and Magnet
+enum materials { kAir = 1,
+                 kPWO,
+                 kAl,
+                 kTyvek,
+                 kFoam,
+                 kSi,
+                 kPCB,
+                 kSteel,
+                 kFiberglas,
+                 kCables };
+
 class Phos
 {
 
@@ -22,7 +34,12 @@ class Phos
   Phos(float r, float theta);
   ~Phos() = default;
 
-  void CreateConverter(float d=10., float h=2.) { fCreateConterter = true; fConvDist = d; fConvThickness = h;}
+  void CreateConverter(float d = 10., float h = 2.)
+  {
+    fCreateConterter = true;
+    fConvDist = d;
+    fConvThickness = h;
+  }
 
   // prepare materials, mixtures and media for calorimeter
   void CreateMaterials();
@@ -44,16 +61,6 @@ class Phos
   void AddHit(int primary, int id, float* hits);
 
  private:
-  enum materials { kAir = 1,
-                   kPWO,
-                   kAl,
-                   kTyvek,
-                   kFoam,
-                   kSi,
-                   kPCB,
-                   kSteel,
-                   kFiberglas,
-                   kCables };    // start numbers after Hall media
   bool fCreateConterter = false; // do not create converted by default
   float fConvDist = 10.;         // distance from crystall surface to converter
   float fConvThickness = 2.;
