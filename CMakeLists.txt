@@ -30,38 +30,11 @@ set(CMAKE_MODULE_PATH "${PHOS256_SOURCE_DIR}/cmake")
 
 include(CheckCXXCompilerFlag)
 
-find_package(PYTHIA REQUIRED)
-find_package(GEANT4 REQUIRED)
-find_package(GEANT4VMC REQUIRED)
+find_package(PYTHIA REQUIRED 8.3.15)
+find_package(GEANT4 REQUIRED 11.2.0)
+find_package(GEANT4VMC REQUIRED 6.6)
 #find_package(CLHEP REQUIRED)
 
-  # ROOT configuration mandatory
-  if(ROOTSYS)
-      find_package(ROOT REQUIRED)
-
-#      # ROOT must be built with XML2 support
-#      if(NOT ROOT_HASXML)
-#          message(FATAL_ERROR "ROOT was not built with xml2 support. Please reinstall or rebuild ROOT with xml2 support")
-#      endif(NOT ROOT_HASXML)
-
-      # find VMC standalone
-      # VMC standalone will fail if ROOT was found with VMC
-      find_package(VMC)
-      if(VMC_FOUND)
-        message(STATUS "Using standalone VMC")
-        # AliRoot's FindROOT module does not actually provide targets but only does link_libraries(ROOT_LIB_DIR).
-        # So AliRoot finds libs by name in that dir but not as a target.
-        # On the other hand VMCLibrary is linked against targets ROOT::Core etc which come in with a find_package(ROOT CONFIG).
-        # So Let's slightly modify the VMCLibrary target properties...
-        set(VMC_DEPS Core EG Geom Physics)
-        set_target_properties(VMCLibrary PROPERTIES INTERFACE_LINK_LIBRARIES "${VMC_DEPS}")
-        # Alias target before VMC was also found by name "VMC"
-       add_library(VMC ALIAS VMCLibrary)
-        include_directories(${VMC_INCLUDE_DIRS})
-      endif()
-  else()
-      message(FATAL_ERROR "ROOT installation not found!\nPlease point to the ROOT installation using -DROOTSYS=ROOT_INSTALL_DIR")
-  endif(ROOTSYS)
 
   # ROOT dictionaries and maps
   include(CMakeROOT)

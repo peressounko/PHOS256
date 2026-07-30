@@ -12,10 +12,7 @@
 # use the Geant4Config.cmake provided by the Geant4 installation to create a
 # single target geant4 with the include directories and libraries we need
 
-find_package(Geant4 NO_MODULE)
-if(NOT Geant4_FOUND)
-  return()
-endif()
+find_package(Geant4 REQUIRED 11.2.0)
 
 add_library(geant4 IMPORTED INTERFACE)
 

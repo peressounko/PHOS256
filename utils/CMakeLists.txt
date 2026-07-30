@@ -1,7 +1,7 @@
 #Create a library called "libSimulation" which includes the source files given in the array.
 Set(LibName "Utils")
 
-set(INCLUDE_DIRECTORIES ${ROOT_INCLUDE_DIR} ${CMAKE_CURRENT_LIST_DIR})
+set(INCLUDE_DIRECTORIES ${ROOT_INCLUDE_DIRS} ${CMAKE_CURRENT_LIST_DIR})
 
 Set(SYSTEM_INCLUDE_DIRECTORIES ${ROOT_INCLUDE_DIR})
 

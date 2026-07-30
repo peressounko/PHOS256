@@ -13,7 +13,13 @@
 # amend the target geant4vmc with the include directories
 
 #GEANT4_VMC uses small letters copy variables to capital ones
-find_package(Geant4VMC)
+find_package(ROOT CONFIG REQUIRED COMPONENTS Core)
+find_package(VGM CONFIG REQUIRED COMPONENTS BaseVGM)
+
+#find_package(Geant4VMC NO_MODULE CONFIG)
+find_package(Geant4VMC REQUIRED 6.6)
+
+#MESSAGE("Geant4VMC:DIRS=" ${Geant4VMC_INCLUDE_DIRS})
 
 SET(GEANT4VMC_DIR ${Geant4VMC_DIR})
 SET(GEANT4_VMC_ROOT ${Geant4VMC_DIR})
