@@ -68,6 +68,7 @@ target_link_libraries(${LibName}
     ${VGM_LIBRARIES}
 )
 
+
 #Setting the correct headers for the object
 target_include_directories(${LibName}-object PUBLIC $<TARGET_PROPERTY:${LibName},INCLUDE_DIRECTORIES>)
 set_target_properties(${LibName}-object PROPERTIES COMPILE_DEFINITIONS $<TARGET_PROPERTY:${LibName},COMPILE_DEFINITIONS>)

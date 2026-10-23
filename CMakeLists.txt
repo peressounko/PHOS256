@@ -4,7 +4,7 @@
 # ${PHOS256_BINARY_DIR} or ${CMAKE_BINARY_DIR}.
 
 # Check if cmake has the required version
-cmake_minimum_required(VERSION 3.20.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.27 FATAL_ERROR)
 
 # Set name of our project to "PHOS256". Has to be done
 # after check of cmake version
@@ -37,6 +37,7 @@ find_package(GEANT4VMC REQUIRED 6.6)
 
 
   # ROOT dictionaries and maps
+find_package(ROOT REQUIRED)
   include(CMakeROOT)
 
   # Turn some common warnings into errors

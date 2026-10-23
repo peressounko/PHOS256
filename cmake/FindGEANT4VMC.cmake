@@ -16,8 +16,8 @@
 find_package(ROOT CONFIG REQUIRED COMPONENTS Core)
 find_package(VGM CONFIG REQUIRED COMPONENTS BaseVGM)
 
-#find_package(Geant4VMC NO_MODULE CONFIG)
-find_package(Geant4VMC REQUIRED 6.6)
+find_package(Geant4VMC NO_MODULE CONFIG)
+#find_package(Geant4VMC REQUIRED 6.6)
 
 #MESSAGE("Geant4VMC:DIRS=" ${Geant4VMC_INCLUDE_DIRS})
 
